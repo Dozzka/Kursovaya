@@ -1,0 +1,18 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:Kursovaya">
+
+    <local:PercentageConverter x:Key="PercentageConverter"/>
+
+    <Style TargetType="TextBlock" x:Key="TextBlockStyle">
+        <Setter Property="TextWrapping" Value="Wrap"/>
+        <Setter Property="TextAlignment" Value="Center"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+    </Style>
+
+    <Style TargetType="Canvas" x:Key="CanvasStyle">
+        
+        
+    </Style>
+
+</ResourceDictionary>

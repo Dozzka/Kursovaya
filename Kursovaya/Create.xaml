@@ -1,0 +1,37 @@
+﻿<Window x:Class="Kursovaya.Create"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Kursovaya"
+        mc:Ignorable="d"
+        Title="Create" Height="540" Width="960">
+    <Window.Resources>
+        <local:PercentageConverter x:Key="PercentageConverter"/>
+    </Window.Resources>
+    <Grid x:Name="MainGrid">
+        <Grid>
+            <DataGrid x:Name="RaspisanieGrid" d:ItemsSource="{d:SampleData ItemCount=5}" AutoGenerateColumns="False" AllowDrop="True"
+                 HorizontalAlignment="Right" VerticalAlignment="Top" Drop="dataGrid_Drop"
+                 Width="{Binding Converter={StaticResource PercentageConverter},ElementName=MainGrid,Path=ActualWidth,ConverterParameter='0,85'}"
+                 Height="{Binding Converter={StaticResource PercentageConverter},ElementName=MainGrid,Path=ActualHeight,ConverterParameter='0,75'}" IsReadOnly="True" BorderBrush="{x:Null}"/>
+            <ScrollViewer x:Name="discipline" VerticalAlignment="Bottom"  HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                          Height ="{Binding Converter={StaticResource PercentageConverter},ElementName=MainGrid,Path=ActualHeight,ConverterParameter='0,2'}">
+                <Grid Height="{Binding ActualHeight, ElementName=discipline}" Width="{Binding ActualWidth, ElementName=discipline}" Background="#FFEA8C8C">
+                    <ListBox x:Name="ListDiscepline" d:ItemsSource="{d:SampleData ItemCount=5}">
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                    </ListBox>
+                </Grid>
+            </ScrollViewer>
+            <ComboBox x:Name="GroupCB" HorizontalAlignment="Left" Margin="7,48,0,0" VerticalAlignment="Top"   Width="{Binding Converter={StaticResource PercentageConverter},ElementName=MainGrid,Path=ActualWidth,ConverterParameter='0,14'}"/>
+            <DatePicker x:Name="WeekChooser"  HorizontalAlignment="Left" Margin="10,118,0,0" VerticalAlignment="Top" Width="129"/>
+            <Button Content="Загрузить расписание" HorizontalAlignment="Left" Margin="8,153,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.227,1.705" Height="32" Width="132" Click="Button_Click"/>
+            <TextBlock HorizontalAlignment="Left" Margin="10,97,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="129" TextAlignment="Center" Text="Выбор недели:"/>
+            <TextBlock HorizontalAlignment="Left" Margin="10,32,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="129" TextAlignment="Center"><Run Text="Выбор "/><Run Language="ru-ru" Text="группы"/><Run Text=":"/></TextBlock>
+        </Grid>
+    </Grid>
+</Window>
