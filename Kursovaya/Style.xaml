@@ -10,9 +10,8 @@
         <Setter Property="HorizontalAlignment" Value="Center"/>
     </Style>
 
-    <Style TargetType="Canvas" x:Key="CanvasStyle">
-        
-        
+    <Style x:Key="DateCell" TargetType="DataGridCell">
+        <Setter Property="TextBlock.TextAlignment" Value="Center"/>
+        <Setter Property="TextElement.Background" Value="Aqua"/>
     </Style>
-
 </ResourceDictionary>

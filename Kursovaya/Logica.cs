@@ -151,18 +151,25 @@ namespace Kursovaya
             return time;
         }
         // Даты недели из дня
-        public static List<DateTime> GetDaysOfWeek(DateTime DateDay)
+        public static List<(DateTime,string)> GetDaysOfWeek(DateTime DateDay)
         {
-            List<DateTime> weekDates = new List<DateTime>();
+            List<(DateTime, string)> weekDates = new List<(DateTime, string)>();
             // Найти дату понедельника
-            
-            DateTime monday = DateDay.AddDays(-(int)DateDay.DayOfWeek + (int)DayOfWeek.Monday);
+            DateTime startOfWeek = DateDay;
+            while (startOfWeek.DayOfWeek != DayOfWeek.Monday)
+            {
+                startOfWeek = startOfWeek.AddDays(-1);
+            }
             for (int i = 0; i < 6; i++)
             {
-                weekDates.Add(monday.AddDays(i));
+                DateTime currentDate = startOfWeek.AddDays(i);
+                string dayName = currentDate.ToString("dddd", new System.Globalization.CultureInfo("ru-RU"));
+                dayName = char.ToUpper(dayName[0]) + dayName.Substring(1);
+                weekDates.Add((currentDate, dayName));
             }
             return weekDates;
         } 
+
         // Подгрузка Дисциплин в LISTBOX
 
         /*            Возвращает Лист(Дисциплина_ID, Дисциплина_Название,   ФИО_Преподователя(3), Кол-во часов)*/

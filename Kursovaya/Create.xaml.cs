@@ -23,7 +23,7 @@ namespace Kursovaya
 
         // ЛистБокс с наименованиями предметов //
 
-        public void LoadListDiscepline(string? Group)
+        private void LoadListDiscepline(string? Group)
         {
             ListDiscepline.Items.Clear();
 
@@ -37,7 +37,7 @@ namespace Kursovaya
         //                   Р А С П И С А Н И Е                 //
         ///     ListBox <= Canvas <- Rectangle <= TextBlock      //
         /////////////////////////////////////////////////////////// 
-        public void CreateRaspisSkeleton()
+        private void CreateRaspisSkeleton()
         {
 
             // Проверка валидности CB 
@@ -48,35 +48,41 @@ namespace Kursovaya
             }
             else { MessageBox.Show("Нужно выбрать группу", "Ошибка", MessageBoxButton.OK); return; }
             DateTime dateTime;
-            if (WeekChooser != null) 
+            if (WeekChooser.SelectedDate != null)
             {
                 dateTime = DateTime.Parse(WeekChooser.Text);
             }
-            else {MessageBox.Show("Нужно выбрать неделю", "Ошибка", MessageBoxButton.OK); return; }
+            else { MessageBox.Show("Нужно выбрать неделю", "Ошибка", MessageBoxButton.OK); return; }
 
-            List < DateTime > dsa = new List<DateTime>();
-            dsa = Logica.GetDaysOfWeek(dateTime);
+            List<(DateTime Date, string DayName)> weekDays = Logica.GetDaysOfWeek(dateTime);
             LoadListDiscepline(Group);
 
-            RaspisanieGrid.ItemsSource = null;
+            RaspisanieGrid.ItemsSource = null; // Очистка старых данных
             RaspisanieGrid.Columns.Clear();
-            DataGridTextColumn timeColumn = new DataGridTextColumn();
-            timeColumn.Header = "Время";
-            timeColumn.Binding = new Binding("Time");
-            timeColumn.Width = DataGridLength.Auto;
-            RaspisanieGrid.Columns.Add(timeColumn);
-            string[] weekDays = { "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота" };
-            DateTime currentDate = DateTime.Today;
-            for (int i = 0; i < weekDays.Length; i++)
+
+            DataGridTextColumn timeColumn = new DataGridTextColumn
             {
-                DataGridTextColumn dayColumn = new DataGridTextColumn();
-                dayColumn.Header = $"{weekDays[i]} {currentDate.AddDays(i).ToString("dd.MM.yyyy")}";
-                dayColumn.Width = new DataGridLength(1, DataGridLengthUnitType.Star);
+                Header = "Время",
+                Binding = new Binding("Time"),
+                Width = DataGridLength.Auto
+            };
+            RaspisanieGrid.Columns.Add(timeColumn);
+
+            foreach(var day in weekDays) 
+            {
+                DataGridTextColumn dayColumn = new DataGridTextColumn
+                {
+                    Header = $"{day.DayName} {day.Date:dd.MM.yy}",
+                    //CellStyle = (Style)Resources["DateCell"],
+                    Width = new DataGridLength(1, DataGridLengthUnitType.Star)
+                    
+                };
                 RaspisanieGrid.Columns.Add(dayColumn);
             }
-            FillTimeRaspisData();
+            FillTimeRaspis();
+            FillDataRaspis(Group,weekDays);
         }
-        public void FillTimeRaspisData()
+        private void FillTimeRaspis()
         {
             List<string> times = Logica.GetTime(connectionString);
             List<ScheduleItemTime> scheduleItemTimes = new List<ScheduleItemTime>();
@@ -85,6 +91,10 @@ namespace Kursovaya
                 scheduleItemTimes.Add(new ScheduleItemTime { Time = ItemTime.Replace("-", "\n") });
             }
             RaspisanieGrid.ItemsSource = scheduleItemTimes;
+        }
+        private void FillDataRaspis(string Group, List<(DateTime Date, string DayName)> Dates) 
+        {
+
         }
 
         private void Canvas_MouseMove(object sender, MouseEventArgs e)
@@ -134,6 +144,11 @@ namespace Kursovaya
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             CreateRaspisSkeleton();
+        }
+
+        private void SaveBT_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }
