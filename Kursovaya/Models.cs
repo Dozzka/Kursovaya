@@ -124,7 +124,57 @@ namespace Kursovaya
             Margin = new Thickness(0, 20, 0, 0);
             head.MouseMove += Head_MouseMove;
         }
+        // Для погрузки из БД
+        public DataOfRaspis(int Discip_ID, string discip, int lect_ID, string Corpus, string Audit, string lect, string connectionString)
+        {
+            Disciplin_ID = Discip_ID;
+            Lecturer_ID = lect_ID;
+            Rectangle rectangle = new Rectangle();
+            Rectangle head = new Rectangle();
+            Disciplin = new TextBlock();
+            Lecturer = new TextBlock();
+            Auditorum = new ComboBox();
+            Auditorum.ItemsSource = Logica.CBLoader("Корпус", "Номер", "Аудитория", connectionString, "-"); ;
+            Auditorum.SelectedItem = Corpus + "-" + Audit;
 
+            Children.Add(rectangle);
+            Children.Add(head);
+            Children.Add(Lecturer);
+            Children.Add(Disciplin);
+            Children.Add(Auditorum);
+
+            Width = 150;
+            Height = 150;
+
+            head.Width = Width;
+            head.Height = 30;
+            head.VerticalAlignment = VerticalAlignment.Top;
+            head.RadiusX = 10;
+            head.RadiusY = 10;
+            head.Fill = Brushes.LightBlue;
+
+            rectangle.Width = Width;
+            rectangle.Height = Height;
+            rectangle.VerticalAlignment = VerticalAlignment.Top;
+            rectangle.RadiusX = 10;
+            rectangle.RadiusY = 10;
+            rectangle.Fill = Brushes.LightGray;
+
+            Disciplin.Text = discip;
+
+            Disciplin.TextWrapping = TextWrapping.Wrap;
+
+
+            Lecturer.Text = lect;
+            Lecturer.TextWrapping = TextWrapping.Wrap;
+
+            Canvas.SetTop(Disciplin, 0);
+            Canvas.SetTop(Lecturer, (Height - Lecturer.ActualHeight) / 2);
+            Canvas.SetBottom(Auditorum, 0);
+
+            Margin = new Thickness(0, 20, 0, 0);
+            head.MouseMove += Head_MouseMove;
+        }
 
         private void Canvas_MouseMove(object sender, MouseEventArgs e)
         {

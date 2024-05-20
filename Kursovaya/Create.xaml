@@ -29,7 +29,7 @@
             </ScrollViewer>
             <ComboBox x:Name="GroupCB" HorizontalAlignment="Left" Margin="7,48,0,0" VerticalAlignment="Top"   Width="{Binding Converter={StaticResource PercentageConverter},ElementName=MainGrid,Path=ActualWidth,ConverterParameter='0,14'}"/>
             <DatePicker x:Name="WeekChooser"  HorizontalAlignment="Left" Margin="10,118,0,0" VerticalAlignment="Top" Width="129"/>
-            <Button Content="Загрузить расписание" HorizontalAlignment="Left" Margin="8,153,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.227,1.705" Height="32" Width="132" Click="Button_Click"/>
+            <Button x:Name="Load" Content="Загрузить расписание" HorizontalAlignment="Left" Margin="8,153,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.227,1.705" Height="32" Width="132" Click="Load_Click"/>
             <TextBlock HorizontalAlignment="Left" Margin="10,97,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="129" TextAlignment="Center" Text="Выбор недели:"/>
             <TextBlock HorizontalAlignment="Left" Margin="10,32,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="129" TextAlignment="Center"><Run Text="Выбор "/><Run Language="ru-ru" Text="группы"/><Run Text=":"/></TextBlock>
         </Grid>

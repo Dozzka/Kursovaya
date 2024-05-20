@@ -2,6 +2,7 @@
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -92,10 +93,29 @@ namespace Kursovaya
             }
             RaspisanieGrid.ItemsSource = scheduleItemTimes;
         }
-        private void FillDataRaspis(string Group, List<(DateTime Date, string DayName)> Dates) 
-        {
 
+        // Подгрузка инфы с бд
+        private void FillDataRaspis(string Group, List<(DateTime Date, string DayName)> Dates)
+        {
+            List<(DataOfRaspis Disciplins, int x, int y)> Data = Logica.LoadDataForRaspis(connectionString, Group, Dates);
+
+            RaspisanieGrid.UpdateLayout();
+
+            foreach (var item in Data)
+            {
+                int column = item.x + 1; 
+                int row = item.y - 1;
+  
+                var cell = GetCell(row, column);
+                if (cell != null)
+                {
+                    cell.Content = item.Disciplins;
+                }
+            }
         }
+
+
+
 
         private void Canvas_MouseMove(object sender, MouseEventArgs e)
         {
@@ -130,9 +150,20 @@ namespace Kursovaya
             }
         }
 
-
-    //  Родителя ищем
-    public static T GetParent<T>(DependencyObject obj) where T : DependencyObject
+        // Метод для получения ячейки по координатам
+        private DataGridCell GetCell(int row, int column)
+        {
+            DataGridRow rowContainer = RaspisanieGrid.ItemContainerGenerator.ContainerFromIndex(row) as DataGridRow;
+            if (rowContainer != null)
+            {
+                DataGridCellsPresenter presenter = FindVisualChild<DataGridCellsPresenter>(rowContainer);
+                DataGridCell cell = presenter.ItemContainerGenerator.ContainerFromIndex(column) as DataGridCell;
+                return cell;
+            }
+            return null;
+        }
+        //  Родителя ищем x2
+        public static T GetParent<T>(DependencyObject obj) where T : DependencyObject
         {
             while (obj != null && !(obj is T))
             {
@@ -140,15 +171,34 @@ namespace Kursovaya
             }
             return obj as T;
         }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private childItem FindVisualChild<childItem>(DependencyObject obj) where childItem : DependencyObject
         {
-            CreateRaspisSkeleton();
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++)
+            {
+                DependencyObject child = VisualTreeHelper.GetChild(obj, i);
+                if (child != null && child is childItem)
+                {
+                    return (childItem)child;
+                }
+                else
+                {
+                    childItem childOfChild = FindVisualChild<childItem>(child);
+                    if (childOfChild != null)
+                    {
+                        return childOfChild;
+                    }
+                }
+            }
+            return null;
         }
-
         private void SaveBT_Click(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private void Load_Click(object sender, RoutedEventArgs e)
+        {
+            CreateRaspisSkeleton();
         }
     }
 }

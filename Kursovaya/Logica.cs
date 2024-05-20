@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Common;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -74,7 +75,7 @@ namespace Kursovaya
                 connection.Open();
                 try
                 {
-                    string sqlQuery = "SELECT Дата, [День Недели].Название День, Пара.Начало || '-' || Пара.Конец AS Время, " +
+                    string sqlQuery = "SELECT Дата, Пара.Начало || '-' || Пара.Конец AS Время, " +
                         "Аудитория_Корпус || '-' || Аудитория_Номер AS Аудитория, " +
                         "GROUP_CONCAT(Группа.Номер, ', ') AS Группа, Дисциплина.Название AS Дисциплина, " +
                         "Преподаватель.Фамилия || ' ' || Преподаватель.Имя || ' ' || IFNULL(Преподаватель.Отчество,'') AS Преподаватель " +
@@ -215,10 +216,57 @@ namespace Kursovaya
             }
             return result;
         }
+        // Подгрузка данных для расписания
+        public static List<(DataOfRaspis Disciplins, int x, int y)> LoadDataForRaspis(string connectionString,string Group,List<(DateTime Date, string)> Data)
+        {
+            List<(DataOfRaspis Disciplins,int x, int y)> DisciplinsList = new List<(DataOfRaspis, int x, int y)>();
+            string query = @"SELECT Дата, Аудитория_Корпус, Аудитория_Номер, [Пара_Номер пары],
+                            [Учебный План_ID], [Учебный План].Дисциплина_ID as ДисциплинаID, Дисциплина.Название as НазвДисцип,
+                            Преподаватель_ID,[Пара_Номер пары], Преподаватель.Фамилия as LN, Преподаватель.Имя AS FN, Преподаватель.Отчество AS FatN
+                            FROM Расписание INNER JOIN [Учебный План] ON [Учебный План].ID = Расписание.[Учебный План_ID]
+                            INNER JOIN Дисциплина ON Дисциплина.ID = [Учебный План].Дисциплина_ID
+                            INNER JOIN Преподаватель ON Расписание.Преподаватель_ID = Преподаватель.ID 
+                            INNER JOIN Группа ON Расписание.Группа_ID = Группа.ID
+                            WHERE Группа.Номер = @Group AND Дата BETWEEN @StartDate AND @EndDate";
+            using (SqliteConnection connection = new SqliteConnection(connectionString))
+                {
+                    SqliteCommand command = new SqliteCommand(query, connection);
+                    command.Parameters.AddWithValue("@StartDate", Data[0].Date.ToString("dd.MM.yyyy"));
+                    command.Parameters.AddWithValue("@EndDate", Data[Data.Count - 1].Date.ToString("dd.MM.yyyy"));
+                    command.Parameters.AddWithValue("@Group", Group);
+                    connection.Open();
+                    SqliteDataReader reader = command.ExecuteReader();
+                    while (reader.Read()) 
+                    {
+                    //Заполнение дисциплин
+                    string date = reader["Дата"].ToString();
+                    int x = Data.FindIndex(item => item.Date.ToString("dd.MM.yyyy") == date);
+                    int y = Convert.ToInt32(reader["Пара_Номер пары"]);
+                        if(x < 0) { continue; }
+                    int plan = Convert.ToInt32(reader["Учебный План_ID"]);
+                    int DiscipId = Convert.ToInt32(reader["ДисциплинаID"]);
+                    string DiscipName = reader["НазвДисцип"].ToString();
+                    int LectId = Convert.ToInt32(reader["Преподаватель_ID"]);
+                    string lectLas = reader["LN"].ToString();
+                    string lectFir = reader["FN"].ToString();
+                    string? lectFat = reader["FatN"].ToString();
+                    string lectFullName = lectLas + " " + lectFir + " " + lectFat;
+                    string Corpus = reader["Аудитория_Корпус"].ToString();
+                    string Audit = reader["Аудитория_Номер"].ToString();
+
+                    DataOfRaspis disciplin = new DataOfRaspis(DiscipId, DiscipName, LectId, Corpus, Audit, lectFullName, connectionString);
+                    DisciplinsList.Add((disciplin,x,y));
+                    }
+                return DisciplinsList;
+            }
+
+        }
+
+
 
     }
 
-
+    
 
 
     // Конвертер для резиновой верстки
