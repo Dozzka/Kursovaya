@@ -30,7 +30,7 @@ namespace Kursovaya
 
             foreach (var i in Logica.GetDiscip(connectionString, Group)) 
             {
-                DataOfRaspis dataOfRaspis = new DataOfRaspis(i.Item1,i.Item2,i.Item3,i.Item4,i.Item5);
+                DataOfRaspis dataOfRaspis = new DataOfRaspis(i.Item1,i.Item2,i.Item3,i.Item4,i.Item5,i.Item6);
                 ListDiscepline.Items.Add(dataOfRaspis);
             }
         }
@@ -56,6 +56,7 @@ namespace Kursovaya
             else { MessageBox.Show("Нужно выбрать неделю", "Ошибка", MessageBoxButton.OK); return; }
 
             List<(DateTime Date, string DayName)> weekDays = Logica.GetDaysOfWeek(dateTime);
+            RaspisanieGrid.DataContext = Group;
             LoadListDiscepline(Group);
 
             RaspisanieGrid.ItemsSource = null; // Очистка старых данных
@@ -82,6 +83,7 @@ namespace Kursovaya
             }
             FillTimeRaspis();
             FillDataRaspis(Group,weekDays);
+            Save.IsEnabled = true;
         }
         private void FillTimeRaspis()
         {
@@ -193,12 +195,22 @@ namespace Kursovaya
         }
         private void SaveBT_Click(object sender, RoutedEventArgs e)
         {
-
+            Logica.LoadToDB(connectionString, RaspisanieGrid,GroupCB.SelectedItem.ToString());
         }
 
         private void Load_Click(object sender, RoutedEventArgs e)
         {
             CreateRaspisSkeleton();
+        }
+
+        private void GroupCB_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            Save.IsEnabled = false;
+        }
+
+        private void Add_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

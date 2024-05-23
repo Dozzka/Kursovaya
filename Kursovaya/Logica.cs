@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Media;
 using Microsoft.Data.Sqlite;
 using static Kursovaya.Create;
 namespace Kursovaya
@@ -152,7 +154,7 @@ namespace Kursovaya
             return time;
         }
         // Даты недели из дня
-        public static List<(DateTime,string)> GetDaysOfWeek(DateTime DateDay)
+        public static List<(DateTime, string)> GetDaysOfWeek(DateTime DateDay)
         {
             List<(DateTime, string)> weekDates = new List<(DateTime, string)>();
             // Найти дату понедельника
@@ -169,15 +171,15 @@ namespace Kursovaya
                 weekDates.Add((currentDate, dayName));
             }
             return weekDates;
-        } 
+        }
 
         // Подгрузка Дисциплин в LISTBOX
 
-        /*            Возвращает Лист(Дисциплина_ID, Дисциплина_Название,   ФИО_Преподователя(3), Кол-во часов)*/
-        public static List<(int, string, int, string, float)> GetDiscip(string connectionString, string GroupName)
+        /*            Возвращает Лист(Дисциплина_ID, Дисциплина_Название, План_ID,  ФИО_Преподователя(3), Кол-во часов)*/
+        public static List<(int, string, int, int, string, float)> GetDiscip(string connectionString, string GroupName)
         {
-            List<(int, string, int, string, float)> result = new List<(int, string, int, string, float)>();
-            string query = "SELECT Дисциплина.ID, Дисциплина.Название, Преподаватель.ID, Преподаватель.Фамилия, " +
+            List<(int, string, int, int, string, float)> result = new List<(int, string, int, int, string, float)>();
+            string query = "SELECT Дисциплина.ID, Дисциплина.Название,[Учебный План].ID, Преподаватель.ID, Преподаватель.Фамилия, " +
                            "Преподаватель.Имя, COALESCE(Преподаватель.Отчество, '') , [Учебный План].[Кол-во часов] " +
                            "FROM Дисциплина " +
                            "INNER JOIN ПреподИДисциплина ON Дисциплина.ID = ПреподИДисциплина.Дисциплина_ID " +
@@ -199,10 +201,11 @@ namespace Kursovaya
                         // Считываем данные из результата запроса
                         int discipID = reader.GetInt32(0);
                         string disciplineName = reader.GetString(1);
-                        int teacherID = reader.GetInt32(2);
-                        string teacherName = reader.GetString(3) + " " + reader.GetString(4) + " " + reader.GetString(5);
-                        float hours = reader.GetFloat(6);
-                        result.Add((discipID, disciplineName, teacherID, teacherName, hours));
+                        int planId = reader.GetInt32(2);
+                        int teacherID = reader.GetInt32(3);
+                        string teacherName = reader.GetString(4) + " " + reader.GetString(5) + " " + reader.GetString(6);
+                        float hours = reader.GetFloat(7);
+                        result.Add((discipID, disciplineName, planId, teacherID, teacherName, hours));
                     }
                 }
                 catch (Exception ex)
@@ -217,9 +220,9 @@ namespace Kursovaya
             return result;
         }
         // Подгрузка данных для расписания
-        public static List<(DataOfRaspis Disciplins, int x, int y)> LoadDataForRaspis(string connectionString,string Group,List<(DateTime Date, string)> Data)
+        public static List<(DataOfRaspis Disciplins, int x, int y)> LoadDataForRaspis(string connectionString, string Group, List<(DateTime Date, string)> Data)
         {
-            List<(DataOfRaspis Disciplins,int x, int y)> DisciplinsList = new List<(DataOfRaspis, int x, int y)>();
+            List<(DataOfRaspis Disciplins, int x, int y)> DisciplinsList = new List<(DataOfRaspis, int x, int y)>();
             string query = @"SELECT Дата, Аудитория_Корпус, Аудитория_Номер, [Пара_Номер пары],
                             [Учебный План_ID], [Учебный План].Дисциплина_ID as ДисциплинаID, Дисциплина.Название as НазвДисцип,
                             Преподаватель_ID,[Пара_Номер пары], Преподаватель.Фамилия as LN, Преподаватель.Имя AS FN, Преподаватель.Отчество AS FatN
@@ -229,20 +232,20 @@ namespace Kursovaya
                             INNER JOIN Группа ON Расписание.Группа_ID = Группа.ID
                             WHERE Группа.Номер = @Group AND Дата BETWEEN @StartDate AND @EndDate";
             using (SqliteConnection connection = new SqliteConnection(connectionString))
+            {
+                SqliteCommand command = new SqliteCommand(query, connection);
+                command.Parameters.AddWithValue("@StartDate", Data[0].Date.ToString("dd.MM.yyyy"));
+                command.Parameters.AddWithValue("@EndDate", Data[Data.Count - 1].Date.ToString("dd.MM.yyyy"));
+                command.Parameters.AddWithValue("@Group", Group);
+                connection.Open();
+                SqliteDataReader reader = command.ExecuteReader();
+                while (reader.Read())
                 {
-                    SqliteCommand command = new SqliteCommand(query, connection);
-                    command.Parameters.AddWithValue("@StartDate", Data[0].Date.ToString("dd.MM.yyyy"));
-                    command.Parameters.AddWithValue("@EndDate", Data[Data.Count - 1].Date.ToString("dd.MM.yyyy"));
-                    command.Parameters.AddWithValue("@Group", Group);
-                    connection.Open();
-                    SqliteDataReader reader = command.ExecuteReader();
-                    while (reader.Read()) 
-                    {
                     //Заполнение дисциплин
                     string date = reader["Дата"].ToString();
                     int x = Data.FindIndex(item => item.Date.ToString("dd.MM.yyyy") == date);
                     int y = Convert.ToInt32(reader["Пара_Номер пары"]);
-                        if(x < 0) { continue; }
+                    if (x < 0) { continue; }
                     int plan = Convert.ToInt32(reader["Учебный План_ID"]);
                     int DiscipId = Convert.ToInt32(reader["ДисциплинаID"]);
                     string DiscipName = reader["НазвДисцип"].ToString();
@@ -255,17 +258,160 @@ namespace Kursovaya
                     string Audit = reader["Аудитория_Номер"].ToString();
 
                     DataOfRaspis disciplin = new DataOfRaspis(DiscipId, DiscipName, LectId, Corpus, Audit, lectFullName, connectionString);
-                    DisciplinsList.Add((disciplin,x,y));
-                    }
+                    DisciplinsList.Add((disciplin, x, y));
+                }
                 return DisciplinsList;
             }
 
         }
 
+        public static void LoadToDB(string connectionString, DataGrid dataGrid,string group)
+        {
+            List<(string date, string time)> listNull = new List<(string, string)>();
+            List<(string date, string time, DataOfRaspis data)> listData = new List<(string, string, DataOfRaspis)>();
+            
+
+            foreach (var rowItem in dataGrid.Items)
+            {
+                foreach (var column in dataGrid.Columns)
+                {
+                    var cellContent = column.GetCellContent(rowItem);
 
 
+                    ScheduleItemTime time = rowItem as ScheduleItemTime;
+                    string currentTime = time.Time;
+
+                    DataGridTextColumn date = column as DataGridTextColumn;
+                    string currentDate = date.Header.ToString();
+
+                    
+                    if (cellContent != null)
+                    {
+                        if(cellContent.GetType() == typeof(DataOfRaspis))
+                        {
+                            DataOfRaspis item = cellContent as DataOfRaspis;
+                            if(item.Auditorum.SelectedItem == null) 
+                            {
+                                MessageBox.Show("Не везде выставленна аудитория","Ошибка",MessageBoxButton.OK,MessageBoxImage.Error);
+                                return;
+                            }
+                            
+                            listData.Add((Convert.ToDateTime(currentDate).ToString("dd.MM.yyyy"), currentTime, item));
+                        }
+                    }
+                    else 
+                    {
+                        listNull.Add((Convert.ToDateTime(currentDate).ToString("dd.MM.yyyy"), currentTime));
+                    }
+                }
+            }
+
+
+            using (SqliteConnection connection = new SqliteConnection(connectionString))
+            {
+                connection.Open();
+                SqliteTransaction transaction = connection.BeginTransaction();
+                try
+                {
+                    int IdGroup = -1;
+                    SqliteCommand GetGroup = new SqliteCommand(@"SELECT ID
+                                                                FROM Группа
+                                                                WHERE Номер = @Group", connection);
+                    GetGroup.Transaction = transaction;
+                    GetGroup.Parameters.AddWithValue("@Group", group);
+                    SqliteDataReader reader = GetGroup.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        IdGroup = Convert.ToInt32(reader["ID"]);
+                    }
+
+                    foreach (var nulls in listNull) 
+                    {
+                        // Добыча id_пара 
+                        int idPara = -1;
+                        SqliteCommand command = new SqliteCommand(@"SELECT [Номер пары] 
+                                                                    FROM Пара
+                                                                    WHERE Начало = @Start AND Конец = @End", connection);
+                        command.Transaction = transaction;
+                        command.Parameters.AddWithValue("@Start", nulls.time.Split(' ')[0]);
+                        command.Parameters.AddWithValue("@End", nulls.time.Split(' ')[1]);
+                        SqliteDataReader reader1 = command.ExecuteReader();
+                        while (reader1.Read()) 
+                        {
+                            idPara = Convert.ToInt32(reader1["Номер Пары"]);
+                        }
+
+                        SqliteCommand deleteCom = new SqliteCommand(@"DELETE FROM Расписание
+                                                                    WHERE [Пара_Номер пары] = @Para AND
+                                                                    Дата = @Date AND
+                                                                    Группа_ID = @Group",connection);
+                        deleteCom.Transaction = transaction;
+                        deleteCom.Parameters.AddWithValue("@Para", idPara);
+                        deleteCom.Parameters.AddWithValue("@Date", nulls.date);
+                        deleteCom.Parameters.AddWithValue("@Group", IdGroup);
+                        deleteCom.ExecuteNonQuery();
+                    }
+                    foreach (var item in listData) 
+                    {
+                        
+                        if (!item.data.fromDb)
+                        {
+                            int idPara = -1;
+                            SqliteCommand command = new SqliteCommand(@"SELECT [Номер пары] 
+                                                                        FROM Пара
+                                                                        WHERE Начало = @Start AND
+                                                                        Конец = @End", connection);
+                            command.Transaction = transaction;
+                            command.Parameters.AddWithValue("@Start", item.time.Split(' ')[0]);
+                            command.Parameters.AddWithValue("@End", item.time.Split(' ')[1]);
+                            SqliteDataReader reader1 = command.ExecuteReader();
+                            while (reader1.Read())
+                            {
+                                idPara = Convert.ToInt32(reader1["Номер Пары"]);
+                            }
+                            // Посадочное место пусто.
+                            SqliteCommand DelForNewData = new SqliteCommand(@"DELETE FROM Расписание
+                                                                              WHERE Дата = @Date AND
+                                                                              [Пара_Номер пары] = @Para AND
+                                                                              Группа_ID = @Group",connection);
+                            DelForNewData.Transaction = transaction;
+                            DelForNewData.Parameters.AddWithValue("@Date", item.date);
+                            DelForNewData.Parameters.AddWithValue("@Para", idPara);
+                            DelForNewData.Parameters.AddWithValue("@Group", IdGroup);
+                            DelForNewData.ExecuteNonQuery();
+
+                            // Сохранение изменений
+                            SqliteCommand AddCommand = new SqliteCommand(@"
+                            INSERT INTO Расписание 
+                            VALUES(@Date,@AudCorp,@AudNum,@Plan,@Para,@LectId,@GroupId)", connection);
+                            AddCommand.Transaction = transaction;
+                            AddCommand.Parameters.AddWithValue("@Date", item.date);
+                            var SplitInf = item.data.Auditorum.SelectedItem.ToString().Split('-');
+                            AddCommand.Parameters.AddWithValue("@AudCorp", SplitInf[0]);
+                            AddCommand.Parameters.AddWithValue("@AudNum", SplitInf[1]);
+                            AddCommand.Parameters.AddWithValue("@Plan", item.data.Plan_ID);
+                            AddCommand.Parameters.AddWithValue("@Para", idPara);
+                            AddCommand.Parameters.AddWithValue("@LectId", item.data.Lecturer_ID);
+                            AddCommand.Parameters.AddWithValue("@GroupId", IdGroup);
+                            AddCommand.ExecuteNonQuery();
+
+                        }
+                    }
+                    transaction.Commit();
+                    MessageBox.Show("Сохранение прошло успешно","Успех");
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    MessageBox.Show("Ошибка при выполнении сохранения: " + ex.Message);
+                }
+                finally
+                {
+                    connection.Close();
+                }
+            }
+        }
     }
-
     
 
 
