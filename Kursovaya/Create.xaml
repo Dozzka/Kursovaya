@@ -7,12 +7,16 @@
         mc:Ignorable="d"
         Title="Create" Height="540" Width="960">
     <Window.Resources>
-        <local:PercentageConverter x:Key="PercentageConverter"/>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Style.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </Window.Resources>
     <Grid x:Name="MainGrid">
         <Grid>
             <DataGrid x:Name="RaspisanieGrid" d:ItemsSource="{d:SampleData ItemCount=5}" AutoGenerateColumns="False" AllowDrop="True"
-                 HorizontalAlignment="Right" VerticalAlignment="Top" Drop="dataGrid_Drop"
+                 HorizontalAlignment="Right" VerticalAlignment="Top" Drop="dataGrid_Drop" CellStyle="{StaticResource DateCell}"
                  Width="{Binding Converter={StaticResource PercentageConverter},ElementName=MainGrid,Path=ActualWidth,ConverterParameter='0,85'}"
                  Height="{Binding Converter={StaticResource PercentageConverter},ElementName=MainGrid,Path=ActualHeight,ConverterParameter='0,79'}" IsReadOnly="True" BorderBrush="{x:Null}"/>
             <ListBox x:Name="ListDiscepline" d:ItemsSource="{d:SampleData ItemCount=5}"

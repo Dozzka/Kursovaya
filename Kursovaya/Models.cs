@@ -1,5 +1,7 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,7 +19,7 @@ namespace Kursovaya
         public string Time { get; set; }
     }
     // логическая модель для блока в расписании
-    public class DataOfRaspis : Canvas 
+    public class DataOfRaspis : Canvas
     {
         public TextBlock Disciplin { get; set; }
         public TextBlock Lecturer { get; set; }
@@ -28,7 +30,6 @@ namespace Kursovaya
         public int Lecturer_ID { get; set; }
         public float Hours { get; set; }
         public bool fromDb { get; set; }
-
 
         // Визуальная модель для блока в листе дисциплин
         public DataOfRaspis(int Discip_ID, string discip,int plan_id,int lect_ID, string lect, float Hours)
@@ -75,6 +76,8 @@ namespace Kursovaya
             Margin = new Thickness(0, 20, 0, 0);
             MouseMove += Canvas_MouseMove;
         }
+
+
         // Модель После переноса в DataGreed
         public DataOfRaspis(DataOfRaspis origData, string connectionString) 
         {
@@ -130,11 +133,12 @@ namespace Kursovaya
 
         }
         // Для погрузки из БД
-        public DataOfRaspis(int Discip_ID, string discip, int lect_ID, string Corpus, string Audit, string lect, string connectionString)
+        public DataOfRaspis(int Discip_ID, string discip,int plan_id, int lect_ID, string Corpus, string Audit, string lect, string connectionString)
         {
             fromDb = true;
             Disciplin_ID = Discip_ID;
             Lecturer_ID = lect_ID;
+            Plan_ID = plan_id;
             Rectangle rectangle = new Rectangle();
             Rectangle head = new Rectangle();
             Disciplin = new TextBlock();
@@ -223,6 +227,7 @@ namespace Kursovaya
                     if (cell != null)
                     {
                         cell.Content = null;
+                        
                     }
                 }
             }

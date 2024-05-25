@@ -1,11 +1,14 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Transactions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -233,11 +236,11 @@ namespace Kursovaya
                             WHERE Группа.Номер = @Group AND Дата BETWEEN @StartDate AND @EndDate";
             using (SqliteConnection connection = new SqliteConnection(connectionString))
             {
+                connection.Open();
                 SqliteCommand command = new SqliteCommand(query, connection);
                 command.Parameters.AddWithValue("@StartDate", Data[0].Date.ToString("dd.MM.yyyy"));
                 command.Parameters.AddWithValue("@EndDate", Data[Data.Count - 1].Date.ToString("dd.MM.yyyy"));
                 command.Parameters.AddWithValue("@Group", Group);
-                connection.Open();
                 SqliteDataReader reader = command.ExecuteReader();
                 while (reader.Read())
                 {
@@ -257,14 +260,70 @@ namespace Kursovaya
                     string Corpus = reader["Аудитория_Корпус"].ToString();
                     string Audit = reader["Аудитория_Номер"].ToString();
 
-                    DataOfRaspis disciplin = new DataOfRaspis(DiscipId, DiscipName, LectId, Corpus, Audit, lectFullName, connectionString);
+                    DataOfRaspis disciplin = new DataOfRaspis(DiscipId, DiscipName, plan, LectId, Corpus, Audit, lectFullName, connectionString);
                     DisciplinsList.Add((disciplin, x, y));
                 }
                 return DisciplinsList;
             }
-
         }
+        
+        public static void GetHours(string connectionString,ListBox listBox, DataGrid current_DGV, string group, DateTime Day) 
+        {
+            List<(DateTime, string)> Week = GetDaysOfWeek(Day);
+            foreach (var Block in listBox.Items)
+            {
+                if (Block.GetType() == typeof(DataOfRaspis))
+                {
+                    DataOfRaspis ListItem = (DataOfRaspis)Block;
+                    float result;
+                    using (SqliteConnection connection = new SqliteConnection(connectionString))
+                    {
+                        connection.Open();
+                        int IdGroup = -1;
+                        SqliteCommand GetGroup = new SqliteCommand(@"SELECT ID
+                                                                 FROM Группа
+                                                                 WHERE Номер = @Group", connection);
+                        GetGroup.Parameters.AddWithValue("@Group", group);
+                        SqliteDataReader reader = GetGroup.ExecuteReader();
+                        while (reader.Read())
+                        {
+                            IdGroup = Convert.ToInt32(reader["ID"]);
+                        }
+                        string query = @"SELECT COUNT(*) FROM Расписание
+                                    WHERE Группа_ID = @GroupId AND Дата NOT BETWEEN @Start
+                                    AND @End AND [Учебный План_ID] = @Plan";
+                        SqliteCommand GetHours = new SqliteCommand(query, connection);
+                        GetHours.Parameters.AddWithValue("@GroupId", IdGroup);
+                        GetHours.Parameters.AddWithValue("@Start", Week[0].Item1.ToShortDateString());
+                        GetHours.Parameters.AddWithValue("@End", Week[Week.Count - 1].Item1.ToShortDateString());
+                        GetHours.Parameters.AddWithValue("@Plan", ListItem.Plan_ID);
+                        result = Convert.ToSingle(GetHours.ExecuteScalar());
 
+                        foreach (var rowItem in current_DGV.Items)
+                        {
+                            foreach (var column in current_DGV.Columns)
+                            {
+                                var cellContent = column.GetCellContent(rowItem);
+
+                                if (cellContent != null)
+                                {
+                                    if (cellContent.GetType() == typeof(DataOfRaspis))
+                                    {
+                                        DataOfRaspis item = cellContent as DataOfRaspis;
+                                        if (item.Plan_ID == ListItem.Plan_ID)
+                                        {
+                                            result++;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        ListItem.HoursTB.Text = (ListItem.Hours - result * 1.5f).ToString();
+                    }
+                }
+            }
+               
+        }
         public static void LoadToDB(string connectionString, DataGrid dataGrid,string group)
         {
             List<(string date, string time)> listNull = new List<(string, string)>();
@@ -305,7 +364,7 @@ namespace Kursovaya
                     }
                 }
             }
-
+         
 
             using (SqliteConnection connection = new SqliteConnection(connectionString))
             {

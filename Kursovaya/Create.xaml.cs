@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -15,7 +16,6 @@ namespace Kursovaya
     {
         string connectionString = $@"Data Source = E:\Учеба\Управление Данными\Raspisanie.db";
 
-
         public Create()
         {
             InitializeComponent();
@@ -28,12 +28,15 @@ namespace Kursovaya
         {
             ListDiscepline.Items.Clear();
 
-            foreach (var i in Logica.GetDiscip(connectionString, Group)) 
+            foreach (var i in Logica.GetDiscip(connectionString, Group))
             {
-                DataOfRaspis dataOfRaspis = new DataOfRaspis(i.Item1,i.Item2,i.Item3,i.Item4,i.Item5,i.Item6);
+                DataOfRaspis dataOfRaspis = new DataOfRaspis(i.Item1, i.Item2, i.Item3, i.Item4, i.Item5, i.Item6);
                 ListDiscepline.Items.Add(dataOfRaspis);
             }
         }
+
+ 
+
         ///////////////////////////////////////////////////////////
         //                   Р А С П И С А Н И Е                 //
         ///     ListBox <= Canvas <- Rectangle <= TextBlock      //
@@ -70,19 +73,19 @@ namespace Kursovaya
             };
             RaspisanieGrid.Columns.Add(timeColumn);
 
-            foreach(var day in weekDays) 
+            foreach (var day in weekDays)
             {
                 DataGridTextColumn dayColumn = new DataGridTextColumn
                 {
                     Header = $"{day.DayName} {day.Date:dd.MM.yy}",
                     //CellStyle = (Style)Resources["DateCell"],
                     Width = new DataGridLength(1, DataGridLengthUnitType.Star)
-                    
+
                 };
                 RaspisanieGrid.Columns.Add(dayColumn);
             }
             FillTimeRaspis();
-            FillDataRaspis(Group,weekDays);
+            FillDataRaspis(Group, weekDays);
             Save.IsEnabled = true;
         }
         private void FillTimeRaspis()
@@ -105,27 +108,18 @@ namespace Kursovaya
 
             foreach (var item in Data)
             {
-                int column = item.x + 1; 
+                int column = item.x + 1;
                 int row = item.y - 1;
-  
+
                 var cell = GetCell(row, column);
                 if (cell != null)
                 {
                     cell.Content = item.Disciplins;
+                    item.Disciplins.MouseRightButtonDown += DataOfRaspis_MouseRightButtonDown;
                 }
             }
-        }
-
-
-
-
-        private void Canvas_MouseMove(object sender, MouseEventArgs e)
-        {
-            Canvas canvas = sender as Canvas;
-            if (e.LeftButton == MouseButtonState.Pressed)
-            {
-                DragDrop.DoDragDrop(canvas, canvas, DragDropEffects.Copy);
-            }
+            
+            Update_Hours();
         }
 
         private void dataGrid_Drop(object sender, DragEventArgs e)
@@ -137,20 +131,23 @@ namespace Kursovaya
                 Point dropPoint = e.GetPosition(grid);
                 UIElement element = grid.InputHitTest(dropPoint) as UIElement;
                 DataGridCell cell = GetParent<DataGridCell>(element);
-                if (cell != null) 
-                { 
+                if (cell != null)
+                {
                     if (e.Data.GetDataPresent(typeof(DataOfRaspis)))
                     {
                         DataOfRaspis CurrentCanvas = e.Data.GetData(typeof(DataOfRaspis)) as DataOfRaspis;
                         if (CurrentCanvas != null)
                         {
-                            cell.Content = new DataOfRaspis(CurrentCanvas,connectionString);
-                            
+                            DataOfRaspis cell_content = new DataOfRaspis(CurrentCanvas, connectionString);
+                            cell.Content = cell_content;
+                            cell_content.MouseRightButtonDown += DataOfRaspis_MouseRightButtonDown;
+                            Update_Hours();
                         }
                     }
                 }
             }
         }
+
 
         // Метод для получения ячейки по координатам
         private DataGridCell GetCell(int row, int column)
@@ -164,6 +161,13 @@ namespace Kursovaya
             }
             return null;
         }
+
+
+        public void Update_Hours()
+        {
+            Logica.GetHours(connectionString, ListDiscepline, RaspisanieGrid, GroupCB.Text, DateTime.Parse(WeekChooser.Text));
+        }
+
         //  Родителя ищем x2
         public static T GetParent<T>(DependencyObject obj) where T : DependencyObject
         {
@@ -195,7 +199,7 @@ namespace Kursovaya
         }
         private void SaveBT_Click(object sender, RoutedEventArgs e)
         {
-            Logica.LoadToDB(connectionString, RaspisanieGrid,GroupCB.SelectedItem.ToString());
+            Logica.LoadToDB(connectionString, RaspisanieGrid, GroupCB.SelectedItem.ToString());
         }
 
         private void Load_Click(object sender, RoutedEventArgs e)
@@ -207,10 +211,15 @@ namespace Kursovaya
         {
             Save.IsEnabled = false;
         }
-
         private void Add_Click(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        // При изменении тригер на изменение часов
+        private void DataOfRaspis_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            Update_Hours();
         }
     }
 }
