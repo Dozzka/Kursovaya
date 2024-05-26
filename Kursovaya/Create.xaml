@@ -15,11 +15,15 @@
     </Window.Resources>
     <Grid x:Name="MainGrid">
         <Grid>
-            <DataGrid x:Name="RaspisanieGrid" d:ItemsSource="{d:SampleData ItemCount=5}" AutoGenerateColumns="False" AllowDrop="True"
-                 HorizontalAlignment="Right" VerticalAlignment="Top" Drop="dataGrid_Drop" CellStyle="{StaticResource DateCell}"
-                 Width="{Binding Converter={StaticResource PercentageConverter},ElementName=MainGrid,Path=ActualWidth,ConverterParameter='0,85'}"
-                 Height="{Binding Converter={StaticResource PercentageConverter},ElementName=MainGrid,Path=ActualHeight,ConverterParameter='0,79'}" IsReadOnly="True" BorderBrush="{x:Null}"/>
-            <ListBox x:Name="ListDiscepline" d:ItemsSource="{d:SampleData ItemCount=5}"
+            <DataGrid Style="{StaticResource RaspisanieGrid}" x:Name="RaspisanieGrid" d:ItemsSource="{d:SampleData ItemCount=5}" AutoGenerateColumns="False" AllowDrop="True"
+                     HorizontalAlignment="Right" VerticalAlignment="Top" Drop="dataGrid_Drop"
+                     Width="{Binding Converter={StaticResource PercentageConverter},ElementName=MainGrid,Path=ActualWidth,ConverterParameter='0,85'}"
+                     Height="{Binding Converter={StaticResource PercentageConverter},ElementName=MainGrid,Path=ActualHeight,ConverterParameter='0,79'}" IsReadOnly="True" BorderBrush="{x:Null}">
+                    <DataGrid.Resources>
+                        <Style TargetType="DataGridCell" BasedOn="{StaticResource Cell}"/>
+                    </DataGrid.Resources>
+                </DataGrid>
+                <ListBox x:Name="ListDiscepline" d:ItemsSource="{d:SampleData ItemCount=5}"
                      VerticalAlignment="Bottom"
                      Height ="{Binding Converter={StaticResource PercentageConverter},ElementName=MainGrid,Path=ActualHeight,ConverterParameter='0,2'}">
                 <ListBox.ItemsPanel>
@@ -32,19 +36,43 @@
                  HorizontalAlignment="Left"
                  VerticalAlignment="Top"
                  Width="{Binding Converter={StaticResource PercentageConverter},ElementName=MainGrid,Path=ActualWidth,ConverterParameter='0,15'}"
-                 Height="{Binding Converter={StaticResource PercentageConverter},ElementName=MainGrid,Path=ActualHeight,ConverterParameter='0,79'}">
-                <ComboBox x:Name="GroupCB" HorizontalAlignment="Left" Margin="7,48,0,0" VerticalAlignment="Top" 
+                 Height="{Binding Converter={StaticResource PercentageConverter},ElementName=MainGrid,Path=ActualHeight,ConverterParameter='0,79'}"
+                  Background="#3c2f2f">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <TextBlock Style="{StaticResource TextBlocks}" Text="Выбор группы:" HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center" Grid.Row="0"
+                           Width="{Binding ElementName=ControlPanel,Path=ActualWidth}"
+                           FontSize="{Binding Converter={StaticResource PercentageConverter},ElementName=ControlPanel,Path=ActualWidth,ConverterParameter='0,1'}"/>
+                <ComboBox x:Name="GroupCB" HorizontalAlignment="Center" Margin="0,50,0,0" VerticalAlignment="Bottom"
                           Width="{Binding Converter={StaticResource PercentageConverter},ElementName=ControlPanel,Path=ActualWidth,ConverterParameter='0,90'}"
-                          SelectionChanged="GroupCB_SelectionChanged"/>
-                <DatePicker x:Name="WeekChooser"  HorizontalAlignment="Left" Margin="10,118,0,0" VerticalAlignment="Top" Width="129"/>
-                <Button x:Name="Load" Content="Загрузить расписание" HorizontalAlignment="Left" Margin="8,153,0,0" VerticalAlignment="Top" 
-                        RenderTransformOrigin="-0.227,1.705" Height="32" Width="132" Click="Load_Click"/>
-                <TextBlock HorizontalAlignment="Left" Margin="10,97,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="129" TextAlignment="Center" Text="Выбор недели:"/>
-                <TextBlock HorizontalAlignment="Left" Margin="10,32,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="129" TextAlignment="Center"><Run Text="Выбор "/><Run Language="ru-ru" Text="группы"/><Run Text=":"/></TextBlock>
-                <Button x:Name="Save" Content="Сохранить изменения" HorizontalAlignment="Left" Margin="8,361,0,0" VerticalAlignment="Top"
-                        RenderTransformOrigin="-0.227,1.705" Height="32" Width="132" Click="SaveBT_Click" IsEnabled="False"/>
-                <Button x:Name="Add" Content="Добавить" HorizontalAlignment="Left" Margin="8,207,0,0" VerticalAlignment="Top" 
-                    RenderTransformOrigin="-0.227,1.705" Height="32" Width="132" Click="Add_Click"/>
+                          SelectionChanged="GroupCB_SelectionChanged" Grid.Row="0"
+                          FontSize="{Binding Converter={StaticResource PercentageConverter},ElementName=ControlPanel,Path=ActualWidth,ConverterParameter='0,1'}"/>
+
+                <TextBlock Style="{StaticResource TextBlocks}" Text="Выбор недели:" HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center" Grid.Row="1"
+                           FontSize="{Binding Converter={StaticResource PercentageConverter},ElementName=ControlPanel,Path=ActualWidth,ConverterParameter='0,1'}"/>
+                <DatePicker x:Name="WeekChooser" HorizontalAlignment="Center" VerticalAlignment="Bottom" Grid.Row="1"
+                            Width="{Binding ElementName=ControlPanel,Path=ActualWidth}"
+                            FontSize="{Binding Converter={StaticResource PercentageConverter},ElementName=ControlPanel,Path=ActualWidth,ConverterParameter='0,1'}"/>
+
+                <Button x:Name="Load" Content="Загрузить расписание" HorizontalAlignment="Center" VerticalAlignment="Center" 
+                        Width="{Binding Converter={StaticResource PercentageConverter},ElementName=ControlPanel,Path=ActualWidth,ConverterParameter='0,90'}"
+                        Height="{Binding Converter={StaticResource PercentageConverter},ElementName=ControlPanel,Path=ActualHeight,ConverterParameter='0,15'}"
+                        Click="Load_Click" Grid.Row="2" Style="{StaticResource Buttons}"/>
+
+                <Button x:Name="Add" Content="Добавить" HorizontalAlignment="Center" VerticalAlignment="Center" 
+                    Width="{Binding Converter={StaticResource PercentageConverter},ElementName=ControlPanel,Path=ActualWidth,ConverterParameter='0,90'}"
+                    Height="{Binding Converter={StaticResource PercentageConverter},ElementName=ControlPanel,Path=ActualHeight,ConverterParameter='0,15'}"
+                    Click="Add_Click" Grid.Row="3" Style="{StaticResource Buttons}"/>
+                
+                <Button x:Name="Save" Content="Сохранить изменения" HorizontalAlignment="Center" VerticalAlignment="Center"
+                        Width="{Binding Converter={StaticResource PercentageConverter},ElementName=ControlPanel,Path=ActualWidth,ConverterParameter='0,90'}"
+                        Height="{Binding Converter={StaticResource PercentageConverter},ElementName=ControlPanel,Path=ActualHeight,ConverterParameter='0,15'}"
+                        Click="SaveBT_Click" IsEnabled="False" Grid.Row="4" Style="{StaticResource Buttons}"/>
             </Grid>
         </Grid>
     </Grid>

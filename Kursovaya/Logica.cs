@@ -13,9 +13,12 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
+using System.Windows.Markup;
 using System.Windows.Media;
 using Microsoft.Data.Sqlite;
-using static Kursovaya.Create;
+using System.IO;
+using System.Runtime.CompilerServices;
+using System.Configuration;
 namespace Kursovaya
 {
     static class Logica
@@ -23,9 +26,43 @@ namespace Kursovaya
         ///////////////////////////////////////////////
         //                Общая логика               //
         ///////////////////////////////////////////////
+        
+        // Проверка что база данных существует и работает
+        public static bool CheckDB() 
+        {
+            string PathToDb = ConfigurationManager.AppSettings["PathToDb"];
+            if (File.Exists(PathToDb)) 
+            {
+                List<string> reference = new List<string> { "Аудитория", "Группа",
+                                                            "Дисциплина", "Курс",
+                                                            "Пара", "ПреподИДисциплина",
+                                                            "Преподаватель", "Расписание",
+                                                            "Тип Курса", "Учебный План"};
+                string connecionstr = @"Data Source=" + PathToDb;
+                using (SqliteConnection connection = new SqliteConnection(connecionstr))
+                    {
+                    connection.Open();
+                    List<string> FromDB = new List<string>();
+                    string query = "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;";
+                    using (SqliteCommand command = new SqliteCommand(query, connection))
+                    {
+                        using (SqliteDataReader reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                string tableName = reader.GetString(0);
+                                FromDB.Add(tableName);
+                            }
+                        }
+                    }
+                    if(reference.All(r => FromDB.Contains(r))) {return true;}
+                }
+            }
+
+            return false;
+        }
 
         //          Подргузка в Combobox            //
-
         static public List<string> CBLoader(string What, string From, string connectionString)
         {
             using (SqliteConnection connection = new SqliteConnection(connectionString))
@@ -483,9 +520,10 @@ namespace Kursovaya
             if (value is double && double.TryParse(parameter.ToString(), out percentage))
             {
                 double actualValue = (double)value;
-                return actualValue * percentage;
+                double result = actualValue * percentage;
+                return result > 1 ? result: 1;
             }
-            return value;
+            return value ;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

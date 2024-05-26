@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Configuration;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -14,7 +15,13 @@ namespace Kursovaya
 {
     public partial class Create : Window
     {
-        string connectionString = $@"Data Source = E:\Учеба\Управление Данными\Raspisanie.db";
+        string connectionString
+        {
+            get
+            {
+                return @"Data Source=" + ConfigurationManager.AppSettings["PathToDb"];
+            }
+        }
 
         public Create()
         {
@@ -213,7 +220,8 @@ namespace Kursovaya
         }
         private void Add_Click(object sender, RoutedEventArgs e)
         {
-
+            Adder adder = new Adder();
+            adder.ShowDialog();
         }
 
         // При изменении тригер на изменение часов

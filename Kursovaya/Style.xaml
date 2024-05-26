@@ -13,4 +13,143 @@
     <Style x:Key="DateCell" TargetType="DataGridCell">
         
     </Style>
+
+    <Style x:Key="ConnectState" TargetType="RadioButton">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Grid>
+                        <Ellipse x:Name="RadioEllipse"
+                             Width="20"
+                             Height="20"
+                             Fill="{TemplateBinding Background}" />
+                        <ContentPresenter HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="RadioEllipse" Property="Fill" Value="Green"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="False">
+                            <Setter TargetName="RadioEllipse" Property="Fill" Value="Red"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="{x:Null}">
+                            <Setter TargetName="RadioEllipse" Property="Fill" Value="Yellow"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="AddButtons" TargetType="Button">
+        <Setter Property="Background" Value="#be9b7b"/>
+        <Setter Property="Foreground" Value="#3c2f2f"/>
+        <Setter Property="BorderBrush" Value="#be9b7b"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="BorderThickness" Value="2"/>
+        <Setter Property="Padding" Value="10,5"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid>
+                        <Border Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="5">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <ContentPresenter.Content>
+                                    <TextBlock Text="{TemplateBinding Content}"
+                                                   TextWrapping="Wrap"
+                                                   TextAlignment="Center"
+                                                   FontSize="{Binding Converter={StaticResource PercentageConverter},
+                                                   ElementName=Buttons,Path=ActualWidth,ConverterParameter='0,04'}"/>
+
+                                </ContentPresenter.Content>
+                            </ContentPresenter>
+                        </Border>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="#4b3832"/>
+                            <Setter Property="BorderBrush" Value="#4b3832"/>
+                            <Setter Property="Foreground" Value="#fff4e6"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter Property="Background" Value="#3c2f2f"/>
+                            <Setter Property="BorderBrush" Value="#3c2f2f"/>
+                            <Setter Property="Foreground" Value="#fff4e6"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="Cell" TargetType="DataGridCell">
+        
+        
+    </Style>
+    <Style x:Key="RaspisanieGrid" TargetType="DataGrid">
+        <Setter Property="Background" Value="#be9b7b"/>
+       
+    </Style>
+
+
+    <Style x:Key="Buttons" TargetType="Button">
+        <Setter Property="Background" Value="#854442"/>
+        <Setter Property="Foreground" Value="#fff4e6"/>
+        <Setter Property="BorderBrush" Value="#be9b7b"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="BorderThickness" Value="2"/>
+        <Setter Property="Padding" Value="10,5"/>
+        <Setter Property="FontSize" Value="{Binding RelativeSource={RelativeSource Self}, 
+               Converter={StaticResource PercentageConverter}, Path=ActualWidth,
+               ConverterParameter='0,1'}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid>
+                        <Border Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="5">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <ContentPresenter.Content>
+                                    <TextBlock Text="{TemplateBinding Content}"
+                                                   TextWrapping="Wrap"
+                                                   TextAlignment="Center"/>
+                                </ContentPresenter.Content>
+                            </ContentPresenter>
+                        </Border>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="#4b3832"/>
+                            <Setter Property="BorderBrush" Value="#4b3832"/>
+                            <Setter Property="Foreground" Value="#fff4e6"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter Property="Background" Value="#3c2f2f"/>
+                            <Setter Property="BorderBrush" Value="#3c2f2f"/>
+                            <Setter Property="Foreground" Value="#fff4e6"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Background" Value="#FFBDBDBD"/>
+                            <Setter Property="BorderBrush" Value="#FFBDBDBD"/>
+                            <Setter Property="Foreground" Value="#FF757575"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="TextBlocks" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="#fff4e6"/>
+    </Style>
+
+
+
 </ResourceDictionary>

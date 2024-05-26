@@ -20,6 +20,7 @@ namespace Kursovaya
         public MainWindow()
         {
             InitializeComponent();
+            Test();
         }
 
 
@@ -33,6 +34,35 @@ namespace Kursovaya
         {
             Create WindowView = new Create();
             WindowView.Show();
+        }
+
+        private void Check_Click(object sender, RoutedEventArgs e)
+        {
+            Test();
+        }
+        private bool Test() 
+        {
+            bool Contact = Logica.CheckDB();
+            RadioState.IsChecked = Contact;
+            if (Contact) 
+            {
+                ViewBT.IsEnabled = true;
+                CreateBT.IsEnabled = true;
+            }
+            else 
+            {
+                ViewBT.IsEnabled = false;
+                CreateBT.IsEnabled = false;
+            }
+            return Contact;
+        }
+        private void Change(object sender, RoutedEventArgs e)
+        {
+            RadioState.IsChecked = null;
+            ViewBT.IsEnabled = false;
+            CreateBT.IsEnabled = false;
+            PathToDB window = new PathToDB();
+            window.Show();
         }
     }
 }

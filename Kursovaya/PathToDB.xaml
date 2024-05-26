@@ -1,0 +1,14 @@
+﻿<Window x:Class="Kursovaya.PathToDB"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Kursovaya"
+        mc:Ignorable="d"
+        Title="Manager" Height="200" Width="405">
+    <Grid>
+        <TextBlock HorizontalAlignment="Center" Margin="0,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="24" TextAlignment="Center" Width="385"><Run Text="Менеджер работы с Б"/><Run Text="азой"/><Run Language="ru-ru" Text=" Данных"/></TextBlock>
+        <Button Content="Создать новую" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="25,0,0,25" Height="45" Width="135" Click="CreateNew" FontFamily="Arial" FontSize="16"/>
+        <Button Content="Найти" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,25,25"  Height="45" Width="135" Click="OpenFile" FontFamily="Arial" FontSize="16"/>
+    </Grid>
+</Window>
