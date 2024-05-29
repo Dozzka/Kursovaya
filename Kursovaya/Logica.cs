@@ -26,12 +26,12 @@ namespace Kursovaya
         ///////////////////////////////////////////////
         //                Общая логика               //
         ///////////////////////////////////////////////
-        
+
         // Проверка что база данных существует и работает
-        public static bool CheckDB() 
+        public static bool CheckDB()
         {
             string PathToDb = ConfigurationManager.AppSettings["PathToDb"];
-            if (File.Exists(PathToDb)) 
+            if (File.Exists(PathToDb))
             {
                 List<string> reference = new List<string> { "Аудитория", "Группа",
                                                             "Дисциплина", "Курс",
@@ -40,7 +40,7 @@ namespace Kursovaya
                                                             "Тип Курса", "Учебный План"};
                 string connecionstr = @"Data Source=" + PathToDb;
                 using (SqliteConnection connection = new SqliteConnection(connecionstr))
-                    {
+                {
                     connection.Open();
                     List<string> FromDB = new List<string>();
                     string query = "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;";
@@ -55,7 +55,7 @@ namespace Kursovaya
                             }
                         }
                     }
-                    if(reference.All(r => FromDB.Contains(r))) {return true;}
+                    if (reference.All(r => FromDB.Contains(r))) { return true; }
                 }
             }
 
@@ -270,13 +270,13 @@ namespace Kursovaya
                             INNER JOIN Дисциплина ON Дисциплина.ID = [Учебный План].Дисциплина_ID
                             INNER JOIN Преподаватель ON Расписание.Преподаватель_ID = Преподаватель.ID 
                             INNER JOIN Группа ON Расписание.Группа_ID = Группа.ID
-                            WHERE Группа.Номер = @Group AND Дата BETWEEN @StartDate AND @EndDate";
+                            WHERE Группа.Номер = @Group AND substr(Дата,7)||substr(Дата,4,2)||substr(Дата,1,2) BETWEEN @StartDate AND @EndDate";
             using (SqliteConnection connection = new SqliteConnection(connectionString))
             {
                 connection.Open();
                 SqliteCommand command = new SqliteCommand(query, connection);
-                command.Parameters.AddWithValue("@StartDate", Data[0].Date.ToString("dd.MM.yyyy"));
-                command.Parameters.AddWithValue("@EndDate", Data[Data.Count - 1].Date.ToString("dd.MM.yyyy"));
+                command.Parameters.AddWithValue("@StartDate", Data[0].Date.ToString("yyyyMMdd"));
+                command.Parameters.AddWithValue("@EndDate", Data[Data.Count - 1].Date.ToString("yyyyMMdd"));
                 command.Parameters.AddWithValue("@Group", Group);
                 SqliteDataReader reader = command.ExecuteReader();
                 while (reader.Read())
@@ -303,8 +303,44 @@ namespace Kursovaya
                 return DisciplinsList;
             }
         }
-        
-        public static void GetHours(string connectionString,ListBox listBox, DataGrid current_DGV, string group, DateTime Day) 
+
+        // Узнать аудиторию для дисциплины на DG
+        public static List<string> GetCollisions(string connectionString, int discipId, string Date, string time)
+        {
+            List<string> result = new List<string>();
+            int pairNumber = -1;
+            using (SqliteConnection connection = new SqliteConnection(connectionString))
+            {
+                connection.Open();
+                SqliteCommand command = new SqliteCommand(@"SELECT [Номер пары] 
+                                                            FROM Пара
+                                                            WHERE Начало = @Start AND
+                                                            Конец = @End", connection);
+                command.Parameters.AddWithValue("@Start", time.Split(' ')[0]);
+                command.Parameters.AddWithValue("@End", time.Split(' ')[1]);
+                SqliteDataReader reader = command.ExecuteReader();
+                {
+                    if (reader.Read())
+                    {
+                        pairNumber = reader.GetInt32(0);
+                    }
+                }
+                SqliteCommand Collcommand = new SqliteCommand(@"SELECT Аудитория_Корпус, Аудитория_Номер FROM Расписание
+                                                            WHERE [Пара_Номер пары] = @Para AND Дата = @Date AND
+                                                            [Учебный План_ID] != @Plan", connection);
+                Collcommand.Parameters.AddWithValue("@Para", pairNumber);
+                Collcommand.Parameters.AddWithValue("@Date", Date);
+                Collcommand.Parameters.AddWithValue("@Plan", discipId);
+                SqliteDataReader readerColl = Collcommand.ExecuteReader();
+                while (readerColl.Read())
+                {
+                    result.Add(readerColl.GetString(0) + "-" + readerColl.GetString(1));
+                }
+            }
+            return result;
+        }
+
+        public static void GetHours(string connectionString, ListBox listBox, DataGrid current_DGV, string group, DateTime Day)
         {
             List<(DateTime, string)> Week = GetDaysOfWeek(Day);
             foreach (var Block in listBox.Items)
@@ -355,17 +391,23 @@ namespace Kursovaya
                                 }
                             }
                         }
-                        ListItem.HoursTB.Text = (ListItem.Hours - result * 1.5f).ToString();
+                        float CurrentHours = (ListItem.Hours - result * 1.5f);
+                        ListItem.HoursTB.Text = CurrentHours.ToString();
+                        if ((int)CurrentHours == 0)
+                        {
+                            ListItem.IsEnabled = false;
+                        }
+
                     }
                 }
             }
-               
+
         }
-        public static void LoadToDB(string connectionString, DataGrid dataGrid,string group)
+        public static void LoadToDB(string connectionString, DataGrid dataGrid, string group)
         {
             List<(string date, string time)> listNull = new List<(string, string)>();
             List<(string date, string time, DataOfRaspis data)> listData = new List<(string, string, DataOfRaspis)>();
-            
+
 
             foreach (var rowItem in dataGrid.Items)
             {
@@ -380,28 +422,28 @@ namespace Kursovaya
                     DataGridTextColumn date = column as DataGridTextColumn;
                     string currentDate = date.Header.ToString();
 
-                    
+
                     if (cellContent != null)
                     {
-                        if(cellContent.GetType() == typeof(DataOfRaspis))
+                        if (cellContent.GetType() == typeof(DataOfRaspis))
                         {
                             DataOfRaspis item = cellContent as DataOfRaspis;
-                            if(item.Auditorum.SelectedItem == null) 
+                            if (item.Auditorum.SelectedItem == null)
                             {
-                                MessageBox.Show("Не везде выставленна аудитория","Ошибка",MessageBoxButton.OK,MessageBoxImage.Error);
+                                MessageBox.Show("Не везде выставленна аудитория", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                                 return;
                             }
-                            
+
                             listData.Add((Convert.ToDateTime(currentDate).ToString("dd.MM.yyyy"), currentTime, item));
                         }
                     }
-                    else 
+                    else
                     {
                         listNull.Add((Convert.ToDateTime(currentDate).ToString("dd.MM.yyyy"), currentTime));
                     }
                 }
             }
-         
+
 
             using (SqliteConnection connection = new SqliteConnection(connectionString))
             {
@@ -421,7 +463,7 @@ namespace Kursovaya
                         IdGroup = Convert.ToInt32(reader["ID"]);
                     }
 
-                    foreach (var nulls in listNull) 
+                    foreach (var nulls in listNull)
                     {
                         // Добыча id_пара 
                         int idPara = -1;
@@ -432,7 +474,7 @@ namespace Kursovaya
                         command.Parameters.AddWithValue("@Start", nulls.time.Split(' ')[0]);
                         command.Parameters.AddWithValue("@End", nulls.time.Split(' ')[1]);
                         SqliteDataReader reader1 = command.ExecuteReader();
-                        while (reader1.Read()) 
+                        while (reader1.Read())
                         {
                             idPara = Convert.ToInt32(reader1["Номер Пары"]);
                         }
@@ -440,16 +482,16 @@ namespace Kursovaya
                         SqliteCommand deleteCom = new SqliteCommand(@"DELETE FROM Расписание
                                                                     WHERE [Пара_Номер пары] = @Para AND
                                                                     Дата = @Date AND
-                                                                    Группа_ID = @Group",connection);
+                                                                    Группа_ID = @Group", connection);
                         deleteCom.Transaction = transaction;
                         deleteCom.Parameters.AddWithValue("@Para", idPara);
                         deleteCom.Parameters.AddWithValue("@Date", nulls.date);
                         deleteCom.Parameters.AddWithValue("@Group", IdGroup);
                         deleteCom.ExecuteNonQuery();
                     }
-                    foreach (var item in listData) 
+                    foreach (var item in listData)
                     {
-                        
+
                         if (!item.data.fromDb)
                         {
                             int idPara = -1;
@@ -469,7 +511,7 @@ namespace Kursovaya
                             SqliteCommand DelForNewData = new SqliteCommand(@"DELETE FROM Расписание
                                                                               WHERE Дата = @Date AND
                                                                               [Пара_Номер пары] = @Para AND
-                                                                              Группа_ID = @Group",connection);
+                                                                              Группа_ID = @Group", connection);
                             DelForNewData.Transaction = transaction;
                             DelForNewData.Parameters.AddWithValue("@Date", item.date);
                             DelForNewData.Parameters.AddWithValue("@Para", idPara);
@@ -494,7 +536,7 @@ namespace Kursovaya
                         }
                     }
                     transaction.Commit();
-                    MessageBox.Show("Сохранение прошло успешно","Успех");
+                    MessageBox.Show("Сохранение прошло успешно", "Успех");
                 }
                 catch (Exception ex)
                 {
@@ -508,7 +550,7 @@ namespace Kursovaya
             }
         }
     }
-    
+
 
 
     // Конвертер для резиновой верстки
@@ -521,9 +563,9 @@ namespace Kursovaya
             {
                 double actualValue = (double)value;
                 double result = actualValue * percentage;
-                return result > 1 ? result: 1;
+                return result > 1 ? result : 1;
             }
-            return value ;
+            return value;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

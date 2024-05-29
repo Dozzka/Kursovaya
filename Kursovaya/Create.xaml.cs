@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Configuration;
 using System.Text.RegularExpressions;
@@ -42,7 +43,7 @@ namespace Kursovaya
             }
         }
 
- 
+
 
         ///////////////////////////////////////////////////////////
         //                   Р А С П И С А Н И Е                 //
@@ -125,7 +126,7 @@ namespace Kursovaya
                     item.Disciplins.MouseRightButtonDown += DataOfRaspis_MouseRightButtonDown;
                 }
             }
-            
+
             Update_Hours();
         }
 
@@ -148,6 +149,7 @@ namespace Kursovaya
                             DataOfRaspis cell_content = new DataOfRaspis(CurrentCanvas, connectionString);
                             cell.Content = cell_content;
                             cell_content.MouseRightButtonDown += DataOfRaspis_MouseRightButtonDown;
+                            DeleteCollision(cell_content, cell);
                             Update_Hours();
                         }
                     }
@@ -169,9 +171,28 @@ namespace Kursovaya
             return null;
         }
 
+        private void DeleteCollision(DataOfRaspis data, DataGridCell cell)
+        {
+            var Time = GetRow(RaspisanieGrid, cell).Item;
 
+            if (Time != null && Time.GetType() == typeof(ScheduleItemTime) && cell.Column != null)
+            {
+                ScheduleItemTime time = Time as ScheduleItemTime;
+                var origSource = data.Auditorum.ItemsSource as IList<string>;
+                List<string> ListAudotorum = Logica.GetCollisions(connectionString, data.Disciplin_ID, Convert.ToDateTime(cell.Column.Header).ToString("dd.MM.yyyy"), time.Time);
+                var updatedSource = origSource.ToList();
+                foreach (string item in ListAudotorum)
+                {
+                    updatedSource.Remove(item);
+                }
+                data.Auditorum.ItemsSource = new ObservableCollection<string>(updatedSource);
+            }
+
+
+        }
         public void Update_Hours()
         {
+            ComboBoxItem comboBoxItem = new ComboBoxItem();
             Logica.GetHours(connectionString, ListDiscepline, RaspisanieGrid, GroupCB.Text, DateTime.Parse(WeekChooser.Text));
         }
 
@@ -203,6 +224,15 @@ namespace Kursovaya
                 }
             }
             return null;
+        }
+        private static DataGridRow GetRow(DataGrid dataGrid, DataGridCell cell)
+        {
+            DependencyObject parent = cell;
+            while (parent != null && !(parent is DataGridRow))
+            {
+                parent = VisualTreeHelper.GetParent(parent);
+            }
+            return parent as DataGridRow;
         }
         private void SaveBT_Click(object sender, RoutedEventArgs e)
         {
