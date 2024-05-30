@@ -18,11 +18,12 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <Button Content="Преподователи" Grid.Row="0" Grid.Column="0" Style="{StaticResource AddButtons}"/>
-        <Button Content="Дисциплины" Grid.Row="0" Grid.Column="1" Style="{StaticResource AddButtons}"/>
-        <Button Content="Учебные планы" Grid.Row="0" Grid.Column="2" Style="{StaticResource AddButtons}"/>
-        <Button Content="Группы" Grid.Row="1" Grid.Column="0"  Style="{StaticResource AddButtons}"/>
-        <Button Content="Аудитории" Grid.Row="1" Grid.Column="1"  Style="{StaticResource AddButtons}"/>
-        <Button Content="Курс" Grid.Row="1" Grid.Column="2"  Style="{StaticResource AddButtons}"/>
+        <Button x:Name = "Course" Content="Курс" Grid.Row="0" Grid.Column="0"  Style="{StaticResource AddButtons}" Click="BT_Click"/>
+        <Button x:Name = "Plan" Content="Учебные планы" Grid.Row="0" Grid.Column="1" Style="{StaticResource AddButtons}" Click="BT_Click"/>
+        <Button x:Name = "Discip" Content="Дисциплины" Grid.Row="0" Grid.Column="2" Style="{StaticResource AddButtons}"  Click="BT_Click"/>
+        <Button x:Name = "Group" Content="Группы" Grid.Row="1" Grid.Column="0"  Style="{StaticResource AddButtons}" Click="BT_Click"/>
+        <Button x:Name = "Auditor" Content="Аудитории" Grid.Row="1" Grid.Column="1"  Style="{StaticResource AddButtons}" Click="BT_Click"/>
+        <Button x:Name = "Lect" Content="Преподователи" Grid.Row="1" Grid.Column="2" Style="{StaticResource AddButtons}" Click="BT_Click"/>
+        
     </Grid>
 </Window>

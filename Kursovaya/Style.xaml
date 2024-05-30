@@ -13,6 +13,15 @@
     <Style x:Key="DateCell" TargetType="DataGridCell">
         
     </Style>
+    <Style x:Key="HiddenTabControlStyle" TargetType="{x:Type TabControl}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TabControl">
+                    <ContentPresenter ContentSource="SelectedContent"/>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 
     <Style x:Key="ConnectState" TargetType="RadioButton">
         <Setter Property="Template">
@@ -86,6 +95,10 @@
             </Setter.Value>
         </Setter>
     </Style>
+    <Style x:Key="CBStyle" TargetType="ComboBox">
+        
+    </Style>
+    
     <Style x:Key="Cell" TargetType="DataGridCell">
         
         

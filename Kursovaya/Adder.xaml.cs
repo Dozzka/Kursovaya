@@ -23,5 +23,11 @@ namespace Kursovaya
         {
             InitializeComponent();
         }
+
+        private void BT_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = (Button)sender;
+            Constructor constructor = new Constructor(button.Name);
+        }
     }
 }
