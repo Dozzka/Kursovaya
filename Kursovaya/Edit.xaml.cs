@@ -101,9 +101,9 @@ namespace Kursovaya
                     {
                         throw new InvalidOperationException("Не число");
                     }
-                    if (!float.TryParse(Hours.Text, out hours))
+                    if (!float.TryParse(Hours.Text, out hours) || hours <= 0)
                     {
-                        throw new InvalidOperationException("Не число");
+                        throw new InvalidOperationException("Не верно введено кол-во часов");
                     }
                     if (hours % 1.5 != 0)
                     {

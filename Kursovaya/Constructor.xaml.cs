@@ -1199,7 +1199,7 @@ namespace Kursovaya
                     throw new InvalidOperationException("Не выбран преподаватель");
                 }
                 float hours;
-                if (!float.TryParse(HoursTB.Text,out hours) || HoursTB.Text.Replace(" ","") == "")
+                if (!float.TryParse(HoursTB.Text,out hours) || HoursTB.Text.Replace(" ","") == "" || hours <= 0)
                 {
                     throw new InvalidOperationException("Не верно введено кол-во часов");
                 }
