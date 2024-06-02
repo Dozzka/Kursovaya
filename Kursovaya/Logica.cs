@@ -19,6 +19,8 @@ using Microsoft.Data.Sqlite;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Configuration;
+using System.Xml.Linq;
+using System.Reflection.Metadata;
 namespace Kursovaya
 {
     static class Logica
@@ -122,7 +124,6 @@ namespace Kursovaya
                         "GROUP_CONCAT(Группа.Номер, ', ') AS Группа, Дисциплина.Название AS Дисциплина, " +
                         "Преподаватель.Фамилия || ' ' || Преподаватель.Имя || ' ' || IFNULL(Преподаватель.Отчество,'') AS Преподаватель " +
                         "FROM Расписание " +
-                        "INNER JOIN [День Недели] ON [День Недели_ID] = [День Недели].ID " +
                         "INNER JOIN Группа ON Группа_ID = Группа.ID " +
                         "INNER JOIN Пара ON [Пара_Номер пары] = Пара.[Номер пары] " +
                         "INNER JOIN [Учебный План] ON [Учебный План].ID = [Учебный План_ID] " +
@@ -219,15 +220,15 @@ namespace Kursovaya
         public static List<(int, string, int, int, string, float)> GetDiscip(string connectionString, string GroupName)
         {
             List<(int, string, int, int, string, float)> result = new List<(int, string, int, int, string, float)>();
-            string query = "SELECT Дисциплина.ID, Дисциплина.Название,[Учебный План].ID, Преподаватель.ID, Преподаватель.Фамилия, " +
-                           "Преподаватель.Имя, COALESCE(Преподаватель.Отчество, '') , [Учебный План].[Кол-во часов] " +
-                           "FROM Дисциплина " +
-                           "INNER JOIN ПреподИДисциплина ON Дисциплина.ID = ПреподИДисциплина.Дисциплина_ID " +
-                           "INNER JOIN Преподаватель ON ПреподИДисциплина.Преподаватель_ID = Преподаватель.ID " +
-                           "INNER JOIN [Учебный План] ON Дисциплина.ID = [Учебный План].Дисциплина_ID " +
-                           "INNER JOIN Курс ON [Учебный План].Курс_ID = Курс.ID " +
-                           "INNER JOIN Группа ON Курс.ID = Группа.Курс_ID " +
-                           "WHERE Группа.Номер = @GroupName";
+            string query = @"SELECT Дисциплина.ID, Дисциплина.Название,[Учебный План].ID, Преподаватель.ID, Преподаватель.Фамилия, 
+                           Преподаватель.Имя, COALESCE(Преподаватель.Отчество, '') , [Учебный План].[Кол-во часов] 
+                           FROM Группа
+                           INNER JOIN Курс ON Группа.Курс_ID = Курс.ID
+                           INNER JOIN [Учебный План] ON Курс.ID = [Учебный План].Курс_ID
+                           INNER JOIN Дисциплина ON [Учебный План].Дисциплина_ID = Дисциплина.ID
+                           INNER JOIN Преподаватель ON [Учебный План].Препод_ID = Преподаватель.ID
+                           WHERE Группа.Номер = @GroupName";
+
             using (SqliteConnection connection = new SqliteConnection(connectionString))
             {
                 connection.Open();
@@ -549,6 +550,159 @@ namespace Kursovaya
                 }
             }
         }
+
+        // Для подгрузки инфы для Комбобоксов в Constructor
+        public static List<Dictionary<string, string>> GetCBForAdd(string connectionString, string tabName)
+        {
+            List<Dictionary<string, string>> data = new List<Dictionary<string, string>>();
+            string query;
+            using (SqliteConnection connection = new SqliteConnection(connectionString))
+            {
+                connection.Open();
+                switch (tabName)
+                {
+                    case "TypeCourse":
+                        query = @"SELECT ID,Название FROM [Тип Курса]";
+                        using (SqliteCommand command = new SqliteCommand(query, connection))
+                        {
+                            SqliteDataReader reader = command.ExecuteReader();
+                            while (reader.Read())
+                            {
+                                var content = new Dictionary<string, string>
+                                {
+                                    {"id", reader.GetInt32(0).ToString()},
+                                    { "Тип", reader.GetString(1) }
+                                };
+                                data.Add(content);
+                            }
+                        }
+                        break;
+                    case "Course":
+                        query = @"SELECT ID,Название_Курса FROM Курс";
+                        using (SqliteCommand command = new SqliteCommand(query, connection))
+                        {
+                            SqliteDataReader reader = command.ExecuteReader();
+                            while (reader.Read())
+                            {
+                                var content = new Dictionary<string, string>
+                                {
+                                    {"id", reader.GetInt32(0).ToString()},
+                                    { "Название_Курса", reader.GetString(1) }
+                                };
+                                data.Add(content);
+                            }
+                        }
+                        break;
+
+                    case "Lect":
+                        query = @"SELECT ID,Фамилия,Имя, Отчество FROM Преподаватель ORDER BY Фамилия";
+                        using (SqliteCommand command = new SqliteCommand(query, connection))
+                        {
+                            SqliteDataReader reader = command.ExecuteReader();
+                            while (reader.Read())
+                            {
+                                var content = new Dictionary<string, string>
+                                {
+                                    {"id", reader.GetInt32(0).ToString()},
+                                    { "ФИО", reader.GetString(1) + " " + reader.GetString(2) + (!reader.IsDBNull(3) ? " " + reader.GetString(3) : null)}
+                                  
+                                };
+                                data.Add(content);
+                            }
+                        }
+                        break;
+
+                    case "Plan":
+                        query = @"SELECT DISTINCT Курс_ID, Название FROM [Учебный План]";
+                        using (SqliteCommand command = new SqliteCommand(query, connection))
+                        {
+                            SqliteDataReader reader = command.ExecuteReader();
+                            while (reader.Read())
+                            {
+                                var content = new Dictionary<string, string>
+                                {
+                                    {"id", reader.GetInt32(0).ToString()},
+                                    {"Название", reader.GetString(1)}
+                                };
+                                data.Add(content);
+                            }
+                        }
+                        break;
+                    case "Discip":
+                        query = @"SELECT ID,Название FROM Дисциплина";
+                        using (SqliteCommand command = new SqliteCommand(query, connection))
+                        {
+                            SqliteDataReader reader = command.ExecuteReader();
+                            while (reader.Read())
+                            {
+                                int id = reader.GetInt32(0);
+                                var content = new Dictionary<string, string>
+                                {
+                                    {"id", reader.GetInt32(0).ToString()},
+                                    { "Название", reader.GetString(1) },
+
+                                };
+                                data.Add(content);
+                            }
+                        }
+                        break;
+                    case "Group":
+                        query = @"SELECT ID,Номер FROM Группа";
+                        using (SqliteCommand command = new SqliteCommand(query, connection))
+                        {
+                            SqliteDataReader reader = command.ExecuteReader();
+                            while (reader.Read())
+                            {
+                                var content = new Dictionary<string, string>
+                                {
+                                    {"id", reader.GetInt32(0).ToString()},
+                                    { "Номер", reader.GetString(1) },
+                                };
+                                data.Add(content);
+                            }
+                        }
+                        break;
+                    case "Auditor":
+                        query = @"SELECT Корпус,Номер FROM Аудитория";
+                        using (SqliteCommand command = new SqliteCommand(query, connection))
+                        {
+                            SqliteDataReader reader = command.ExecuteReader();
+                            while (reader.Read())
+                            {
+                                var content = new Dictionary<string, string>
+                                {
+                                    { "Корпус", reader.GetString(0)},
+                                    { "Номер", reader.GetString(1) }
+                                };
+                                data.Add(content);
+                            }
+                        }
+                        break;
+                    default:
+                        return data;
+                }
+            }
+            return data;
+        }
+        // Узнать какие щас есть предметы у Преподавателя
+        public static List<int> GetLectDiscip(string connectionString, int LectId)
+        {
+            List<int> result = new List<int>();
+            using (SqliteConnection connection = new SqliteConnection(connectionString)) 
+            {
+                connection.Open();
+                SqliteCommand command = new SqliteCommand(@"SELECT Дисциплина_ID FROM ПреподИДисциплина
+                                                            WHERE Преподаватель_ID = @LectID", connection);
+                command.Parameters.AddWithValue("@LectID", LectId);
+                SqliteDataReader reader = command.ExecuteReader();
+                while (reader.Read()) 
+                {
+                    result.Add(reader.GetInt32(0));
+                }
+            }
+            return result;
+        }
+
     }
 
 

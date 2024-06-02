@@ -1,8 +1,10 @@
 ﻿using System;
 using System.CodeDom;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -13,8 +15,132 @@ using System.Windows.Shapes;
 
 namespace Kursovaya
 {
+    //Модели для Добавления
+    public class PlanItem
+    {
+        public int? id = null;
+        public string DisciplineId { get; set; }
+        public string Discipline { get; set; }
+        public string LectId { get; set; }
+        public string Lect { get; set; }
+        public float Hours { get; set; }
+        public PlanItem(string IdDiscip, string discip, string IdLect, string lect, float hours)
+        {
+            DisciplineId = IdDiscip;
+            Discipline = discip;
+            LectId = IdLect;
+            Lect = lect;
+            Hours = hours;
+        }
+        public PlanItem(int ID, string IdDiscip, string discip, string IdLect, string lect, float hours)
+        {
+            id = ID;
+            DisciplineId = IdDiscip;
+            Discipline = discip;
+            LectId = IdLect;
+            Lect = lect;
+            Hours = hours;
+        }
+        public PlanItem(PlanItem original)
+        {
+            id = original.id;
+            DisciplineId = original.DisciplineId;
+            Discipline = original.Discipline;
+            LectId = original.LectId;
+            Lect = original.Lect;
+            Hours = original.Hours;
+        }
+    }
+
+    public class ComboBoxItemForAdd
+    {
+        public string Text { get; set; }
+        public string Id { get; set; }
+        public string IdSec { get; set; }
+
+
+        public ComboBoxItemForAdd(string id, string text)
+        {
+            Text = text;
+            Id = id;
+            IdSec = "-1";
+        }
+        public ComboBoxItemForAdd(string id, string idSec, string text)
+        {
+            Text = text;
+            Id = id;
+            IdSec = idSec;
+        }
+
+        // Когда будет CB вызывать метод будет текст
+        public override string ToString()
+        {
+            return Text;
+        }
+    }
+
+    public class ListBoxItemForAdd : INotifyPropertyChanged
+    {
+        private int id;
+        private string text;
+        private bool checkBoxState;
+
+        public int Id
+        {
+            get { return id; }
+            set { SetProperty(ref id, value); }
+        }
+
+        public string Text
+        {
+            get { return text; }
+            set { SetProperty(ref text, value); }
+        }
+
+        public bool CheckBoxState
+        {
+            get { return checkBoxState; }
+            set { SetProperty(ref checkBoxState, value); }
+        }
+
+        public ListBoxItemForAdd(int id, string text, bool isChecked)
+        {
+            Id = id;
+            Text = text;
+            CheckBoxState = isChecked;
+        }
+
+        public ListBoxItemForAdd(int id, string text)
+        {
+            Id = id;
+            Text = text;
+            CheckBoxState = false;
+        }
+
+        public override string ToString()
+        {
+            return Text;
+        }
+
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        protected bool SetProperty<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
+        {
+            if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+            field = value;
+            OnPropertyChanged(propertyName);
+            return true;
+        }
+    }
+
     // Модель для времени
-    public class ScheduleItemTime 
+    public class ScheduleItemTime
     {
         public string Time { get; set; }
     }
@@ -32,8 +158,8 @@ namespace Kursovaya
         public bool fromDb { get; set; }
 
         // Визуальная модель для блока в листе дисциплин
-        public DataOfRaspis(int Discip_ID, string discip,int plan_id,int lect_ID, string lect, float Hours)
-            {
+        public DataOfRaspis(int Discip_ID, string discip, int plan_id, int lect_ID, string lect, float Hours)
+        {
             Disciplin_ID = Discip_ID;
             Lecturer_ID = lect_ID;
             this.Hours = Hours;
@@ -46,7 +172,7 @@ namespace Kursovaya
             Children.Add(Lecturer);
             Children.Add(Disciplin);
             Children.Add(HoursTB);
-            
+
             Width = 150;
             Height = 150;
             rectangle.Width = Width;
@@ -55,7 +181,7 @@ namespace Kursovaya
             rectangle.RadiusX = 10;
             rectangle.RadiusY = 10;
             rectangle.Fill = Brushes.LightGray;
-            
+
             Disciplin.Text = discip;
             Disciplin.MaxWidth = rectangle.Width;
             Disciplin.Style = (Style)Application.Current.Resources["TextBlockStyle"];
@@ -79,7 +205,7 @@ namespace Kursovaya
 
 
         // Модель После переноса в DataGreed
-        public DataOfRaspis(DataOfRaspis origData, string connectionString) 
+        public DataOfRaspis(DataOfRaspis origData, string connectionString)
         {
             fromDb = false;
             Disciplin_ID = origData.Disciplin_ID;
@@ -91,7 +217,7 @@ namespace Kursovaya
             Lecturer = new TextBlock();
             Auditorum = new ComboBox();
             Auditorum.ItemsSource = Logica.CBLoader("Корпус", "Номер", "Аудитория", connectionString, "-");
-            
+
             Children.Add(rectangle);
             Children.Add(head);
             Children.Add(Lecturer);
@@ -106,7 +232,7 @@ namespace Kursovaya
             head.RadiusX = 10;
             head.RadiusY = 10;
             head.Fill = Brushes.LightBlue;
-            
+
             rectangle.Width = Width;
             rectangle.Height = Height;
             rectangle.VerticalAlignment = VerticalAlignment.Top;
@@ -124,7 +250,7 @@ namespace Kursovaya
 
             Canvas.SetTop(Disciplin, 0);
             Canvas.SetTop(Lecturer, (Height - Lecturer.ActualHeight) / 2);
-            Canvas.SetBottom(Auditorum,0);
+            Canvas.SetBottom(Auditorum, 0);
 
             Margin = new Thickness(0, 20, 0, 0);
 
@@ -133,7 +259,7 @@ namespace Kursovaya
 
         }
         // Для погрузки из БД
-        public DataOfRaspis(int Discip_ID, string discip,int plan_id, int lect_ID, string Corpus, string Audit, string lect, string connectionString)
+        public DataOfRaspis(int Discip_ID, string discip, int plan_id, int lect_ID, string Corpus, string Audit, string lect, string connectionString)
         {
             fromDb = true;
             Disciplin_ID = Discip_ID;
@@ -189,7 +315,7 @@ namespace Kursovaya
             head.MouseRightButtonDown += Head_RightClick;
         }
 
-        private void Changed_CB(object sender, SelectionChangedEventArgs e) 
+        private void Changed_CB(object sender, SelectionChangedEventArgs e)
         {
             ComboBox comboBox = sender as ComboBox;
             DataOfRaspis parent = FindParent<DataOfRaspis>(comboBox);
@@ -227,7 +353,7 @@ namespace Kursovaya
                     if (cell != null)
                     {
                         cell.Content = null;
-                        
+
                     }
                 }
             }

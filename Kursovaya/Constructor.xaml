@@ -5,38 +5,127 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Kursovaya"
         mc:Ignorable="d"
-        Height="450" Width="450">
+        Height="450" Width="470"
+        ResizeMode="NoResize">
 
     <Grid>
-        <TabControl x:Name="Tabs">
-            <!-- Style="{StaticResource HiddenTabControlStyle} -->
+        <TabControl x:Name="Tabs" Style="{StaticResource HiddenTabControlStyle}">
 
             <TabItem Header="Курс" x:Name="CourseTab">
                 <Grid Background="#3c2f2f">
-                    <Button Content="Button" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="4,4,4,4" Height="44" Width="108"/>
-                    <ComboBox Style="{StaticResource CBStyle }" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="212" Height="30"/>
-                    <TextBlock Style="{StaticResource TextBlocks}" HorizontalAlignment="Right" Margin="0,10,10,0" TextWrapping="Wrap" Text="ID:" IsEnabled="False" VerticalAlignment="Top" Height="15" Width="153"/>
-                    <TextBlock x:Name="Course_ID" Style="{StaticResource TextBlocks}" HorizontalAlignment="Right" Margin="0,25,10,0" TextWrapping="Wrap" Text="" IsEnabled="False" VerticalAlignment="Top" Height="15" Width="153"/>
-                    <TextBlock HorizontalAlignment="Left" Margin="10,90,0,0" Style="{StaticResource TextBlocks}"  TextWrapping="Wrap" Text="Название:" VerticalAlignment="Top"/>
-                    <TextBlock HorizontalAlignment="Left" Margin="91,90,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Width="353"/>
+
+                    <ComboBox x:Name="CBCourse" Style="{StaticResource CBStyle }" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="349" Height="30"/>
+                    <TextBlock Style="{StaticResource TextBlocks}" HorizontalAlignment="Right" Margin="0,10,10,0" TextWrapping="Wrap" Text="ID:" IsEnabled="False" VerticalAlignment="Top" Height="15" Width="70"/>
+                    <TextBlock x:Name="Course_ID" Style="{StaticResource TextBlocks}" HorizontalAlignment="Right" Margin="0,25,10,0" TextWrapping="Wrap" Text="" IsEnabled="False" VerticalAlignment="Top" Height="15" Width="70"/>
+                    <TextBlock HorizontalAlignment="Left" Margin="10,45,0,0" Style="{StaticResource TextBlocks}"  TextWrapping="Wrap" Text="Название:" VerticalAlignment="Top" FontSize="22"/>
+                    <TextBox x:Name="InputNameCourse" HorizontalAlignment="Center" Margin="0,75,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="444" FontSize="20"/>
+
+
+                    <TextBlock HorizontalAlignment="Left" Margin="10,164,0,0" FontSize="22" Style="{StaticResource TextBlocks}"  TextWrapping="Wrap" Text="Тип курса:" VerticalAlignment="Top"/>
+
+                    <ComboBox x:Name="TypeCourse" Style="{StaticResource CBStyle}" HorizontalAlignment="Left" Margin="10,198,0,0" VerticalAlignment="Top" Width="266" Height="30"/>
+
                 </Grid>
             </TabItem>
+
             <TabItem Header="Учебный план" x:Name="PlanTab">
-                <Grid Background="#FFE5E5E5"/>
+                <Grid Background="#3c2f2f">
+                    
+                    <ComboBox x:Name="CBPlan" Style="{StaticResource CBStyle}" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="222" Height="30"/>
+                    <TextBlock HorizontalAlignment="Left" Margin="10,45,0,0" Style="{StaticResource TextBlocks}"  TextWrapping="Wrap" Text="Название:" VerticalAlignment="Top" FontSize="22"/>
+                    <TextBox x:Name="InputPlanName" HorizontalAlignment="Center" Margin="0,79,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="444" FontSize="20"/>
+                    <Button Content="+" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,112,10,0" Height="25" Width="25" Click="AddRow_Click"/>
+                    <ComboBox x:Name="CBPlanDiscip" HorizontalAlignment="Left" Margin="10,113,0,0" VerticalAlignment="Top" Width="153" SelectionChanged="CBPlanDiscip_SelectionChanged"/>
+                    <ComboBox x:Name ="CBPlanLectur" HorizontalAlignment="Left" Margin="168,113,0,0" VerticalAlignment="Top" Width="199" IsEnabled="False"/>
+                    <TextBox x:Name="HoursTB"  HorizontalAlignment="Left" Margin="372,113,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="39" Height="22"/>
+                    <ListBox x:Name="DataLB" ItemsSource="{Binding PlanItems}" Margin="10,141,10,0" HorizontalAlignment="Center" VerticalAlignment="Top" Width="444" Height="190">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" MouseRightButtonDown="StackPanel_MouseRightButtonDown">
+                                    <Button Content="-" Command="{Binding RelativeSource={RelativeSource AncestorType=ListBox}, Path=DataContext.RemoveCommand}" CommandParameter="{Binding}" Width="19" Foreground="Red" Margin="2,0,2,0" />
+                                    <TextBlock x:Name = "Discip" Text="{Binding Discipline}" Width="150"  Margin="2,0,2,0"/>
+                                    <TextBlock x:Name="Lect" Text="{Binding Lect}" Width="200"  Margin="2,0,2,0"/>
+                                    <TextBlock x:Name="Hours" Text="{Binding Hours}" Width="40"  Margin="2,0,2,0"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <ComboBox x:Name="CourseIDCB" HorizontalAlignment="Left" Margin="237,10,0,0" VerticalAlignment="Top" Width="217" Height="30"/>
+
+
+
+                </Grid>
             </TabItem>
+
             <TabItem Header="Дисциплина" x:Name="DiscipTab">
-                <Grid Background="#FFE5E5E5"/>
+                <Grid Background="#3c2f2f">
+                    <ComboBox x:Name="CBDiscip" Style="{StaticResource CBStyle}" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="349" Height="30"/>
+                    <TextBlock Style="{StaticResource TextBlocks}" HorizontalAlignment="Right" Margin="0,10,10,0" TextWrapping="Wrap" Text="ID:" IsEnabled="False" VerticalAlignment="Top" Height="15" Width="70"/>
+
+                    <TextBlock HorizontalAlignment="Left" Margin="10,71,0,0" Style="{StaticResource TextBlocks}"  TextWrapping="Wrap" Text="Название:" VerticalAlignment="Top" FontSize="22"/>
+                    <TextBlock x:Name="Discip_ID" Style="{StaticResource TextBlocks}" HorizontalAlignment="Right" Margin="0,25,10,0" TextWrapping="Wrap" Text="" IsEnabled="False" VerticalAlignment="Top" Height="15" Width="70"/>
+                    <TextBox x:Name="InputNameDiscip" HorizontalAlignment="Center" Margin="0,105,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="424" FontSize="20"/>
+                </Grid>
             </TabItem>
-            <TabItem Header="Групп" x:Name="GroupTab">
-                <Grid Background="#FFE5E5E5"/>
+            <TabItem Header="Группа" x:Name="GroupTab">
+                <Grid Background="#3c2f2f">
+                    <ComboBox x:Name="CBGroup" Style="{StaticResource CBStyle}" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="349" Height="30"/>
+                    <TextBlock Style="{StaticResource TextBlocks}" HorizontalAlignment="Right" Margin="0,10,10,0" TextWrapping="Wrap" Text="ID:" IsEnabled="False" VerticalAlignment="Top" Height="15" Width="70"/>
+                    <TextBlock x:Name="GroupId" Style="{StaticResource TextBlocks}" HorizontalAlignment="Right" Margin="0,25,10,0" TextWrapping="Wrap" Text="" IsEnabled="False" VerticalAlignment="Top" Height="15" Width="70"/>
+                    <TextBlock HorizontalAlignment="Left" Margin="10,45,0,0" Style="{StaticResource TextBlocks}"  TextWrapping="Wrap" Text="Название:" VerticalAlignment="Top" FontSize="22"/>
+                    <TextBox x:Name="InputNameGroup" HorizontalAlignment="Center" Margin="0,75,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="444" FontSize="20"/>
+                    <TextBlock HorizontalAlignment="Left" Margin="10,164,0,0" FontSize="22" Style="{StaticResource TextBlocks}"  TextWrapping="Wrap" VerticalAlignment="Top"><Run Language="ru-ru" Text="К"/><Run Text="урс:"/></TextBlock>
+                    <ComboBox x:Name="CBCourseForGroup" Style="{StaticResource CBStyle}" HorizontalAlignment="Center" Margin="0,198,0,0" VerticalAlignment="Top" Width="444" Height="30"/>
+
+                </Grid>
             </TabItem>
             <TabItem Header="Аудитория" x:Name="AuditorTab">
-                <Grid Background="#FFE5E5E5"/>
+                <Grid Background="#3c2f2f">
+                    <ComboBox x:Name="CBAuditor" Style="{StaticResource CBStyle}" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="349" Height="30"/>
+                    <TextBlock HorizontalAlignment="Left" Margin="10,71,0,0" Style="{StaticResource TextBlocks}"  TextWrapping="Wrap" Text="Корпус:" VerticalAlignment="Top" FontSize="22"/>
+                    <TextBlock HorizontalAlignment="Left" Margin="10,149,0,0" Style="{StaticResource TextBlocks}"  TextWrapping="Wrap" Text="Аудитория:" VerticalAlignment="Top" FontSize="22"/>
+                    <TextBox x:Name = "InputCorpus" HorizontalAlignment="Left" Margin="10,105,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="173" Height="32" FontSize="22"/>
+                    <TextBox x:Name = "InputAuditor" HorizontalAlignment="Left" Margin="10,180,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="173" Height="31" FontSize="22"/>
+
+
+
+                </Grid>
             </TabItem>
             <TabItem Header="Преподователь" x:Name="LectTab">
-                <Grid Background="#FFE5E5E5"/>
+                <Grid Background="#3c2f2f">
+                    <ComboBox x:Name="CBlect" Style="{StaticResource CBStyle}" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="349" Height="30"/>
+                    <TextBlock Style="{StaticResource TextBlocks}" HorizontalAlignment="Right" Margin="0,10,10,0" TextWrapping="Wrap" Text="ID:" IsEnabled="False" VerticalAlignment="Top" Height="15" Width="70"/>
+
+                    <TextBlock HorizontalAlignment="Left" Margin="20,89,0,0" Style="{StaticResource TextBlocks}"  TextWrapping="Wrap" VerticalAlignment="Top" FontSize="16" Text="Имя"/>
+                    <TextBlock x:Name="Lect_ID" Style="{StaticResource TextBlocks}" HorizontalAlignment="Right" Margin="0,25,10,0" TextWrapping="Wrap" Text="" IsEnabled="False" VerticalAlignment="Top" Height="15" Width="70"/>
+                    <TextBox x:Name="InputLNameLect" HorizontalAlignment="Center" Margin="0,66,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="424" FontSize="16"/>
+                    <TextBlock HorizontalAlignment="Left" Margin="20,45,0,0" Style="{StaticResource TextBlocks}"  TextWrapping="Wrap" VerticalAlignment="Top" FontSize="16"><Run Language="ru-ru" Text="Фамилия"/></TextBlock>
+                    <TextBox x:Name="InputFNameLect" HorizontalAlignment="Center" Margin="0,110,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="424" FontSize="16"/>
+                    <TextBlock HorizontalAlignment="Left" Margin="20,136,0,0" Style="{StaticResource TextBlocks}"  TextWrapping="Wrap" VerticalAlignment="Top" FontSize="16"><Run Language="ru-ru" Text="Отчество"/></TextBlock>
+                    <TextBox x:Name="InputFatNameLect" HorizontalAlignment="Center" Margin="0,157,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top"  Width="424" FontSize="16"/>
+
+                    <ListBox x:Name="ListDiscips"  d:ItemsSource="{d:SampleData ItemCount=5}" Margin="10,191,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="434" Height="135">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="390" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding Text}" VerticalAlignment="Center" TextWrapping="Wrap" Grid.Column="0" Margin="0,0,10,0"/>
+                                    <CheckBox IsChecked="{Binding CheckBoxState}" VerticalAlignment="Center" Grid.Column="1"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+
             </TabItem>
         </TabControl>
+        <Button x:Name="DeleteBT"  Content="Удалить" Style="{StaticResource Buttons}"  VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="10,10,10,10" Height="44" Width="108" IsEnabled="False" Click="DeleteClick"/>
+        <Button x:Name="ChangeBT" Content="Изменить" Style="{StaticResource Buttons}"  VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="10,10,10,10" Height="44" Width="108"  IsEnabled="False" Click="Change"/>
+        <Button x:Name="AddBt" Content="Добавить" Style="{StaticResource Buttons}"  VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="10,10,10,10" Height="44" Width="108" Click="AddClick"/>
+
 
     </Grid>
 </Window>

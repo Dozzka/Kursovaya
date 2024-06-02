@@ -28,6 +28,7 @@ namespace Kursovaya
         {
             Button button = (Button)sender;
             Constructor constructor = new Constructor(button.Name);
+            constructor.WindowStartupLocation = WindowStartupLocation.CenterScreen;
         }
     }
 }

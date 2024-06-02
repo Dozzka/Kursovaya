@@ -23,7 +23,6 @@ namespace Kursovaya
                 return @"Data Source=" + ConfigurationManager.AppSettings["PathToDb"];
             }
         }
-
         public Create()
         {
             InitializeComponent();
@@ -42,7 +41,6 @@ namespace Kursovaya
                 ListDiscepline.Items.Add(dataOfRaspis);
             }
         }
-
 
 
         ///////////////////////////////////////////////////////////
@@ -252,12 +250,38 @@ namespace Kursovaya
         {
             Adder adder = new Adder();
             adder.ShowDialog();
+            adder.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+
+            MessageBoxResult result = MessageBox.Show("Перезапустить текущее окно?", "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result == MessageBoxResult.Yes)
+            {
+                RestartForm();
+            }
         }
 
         // При изменении тригер на изменение часов
         private void DataOfRaspis_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
             Update_Hours();
+        }
+        private void RestartForm()
+        {
+            double left = this.Left;
+            double top = this.Top;
+            double width = this.Width;
+            double height = this.Height;
+            WindowState windowState = this.WindowState;
+
+            Create newForm = new Create();
+
+            newForm.Left = left;
+            newForm.Top = top;
+            newForm.Width = width;
+            newForm.Height = height;
+            newForm.WindowState = windowState;
+
+            newForm.Show();
+            this.Close();
         }
     }
 }

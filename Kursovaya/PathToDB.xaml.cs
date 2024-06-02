@@ -126,73 +126,85 @@ namespace Kursovaya
         readonly string[] sqlCommands =
                 {
                     @"CREATE TABLE ""Учебный План"" (
-                        ""ID"" INTEGER NOT NULL,
-                        ""Название"" varchar(40) NOT NULL,
-                        ""Курс_ID"" int NOT NULL,
-                        ""Дисциплина_ID"" int NOT NULL,
-                        ""Кол-во часов"" float(5, 2) NOT NULL,
-                        CONSTRAINT ""Учебный План_Курс"" FOREIGN KEY(""Курс_ID"") REFERENCES ""Курс""(""ID""),
-                        CONSTRAINT ""Учебный План_Дисциплина"" FOREIGN KEY(""Дисциплина_ID"") REFERENCES ""Дисциплина""(""ID""),
-                        PRIMARY KEY(""ID"" AUTOINCREMENT)
+                    ""ID""	INTEGER NOT NULL,
+                    ""Название""	varchar(40) NOT NULL,
+                    ""Курс_ID""	int NOT NULL,
+                    ""Дисциплина_ID""	int NOT NULL,
+                    ""Препод_ID""	INTEGER,
+                    ""Кол-во часов""	float(5, 2) NOT NULL,
+                    FOREIGN KEY(""Препод_ID"") REFERENCES ""Преподаватель""(""ID"") ON DELETE SET NULL ON UPDATE CASCADE,
+                    PRIMARY KEY(""ID"" AUTOINCREMENT),
+                    FOREIGN KEY(""Дисциплина_ID"") REFERENCES ""Дисциплина""(""ID"") ON DELETE CASCADE ON UPDATE CASCADE,
+                    FOREIGN KEY(""Курс_ID"") REFERENCES ""Курс""(""ID"") ON DELETE CASCADE ON UPDATE CASCADE
                     )",
+
                     @"CREATE TABLE ""Тип Курса"" (
-                        ""ID"" INTEGER NOT NULL,
-                        ""Название"" varchar(30) NOT NULL,
-                        CONSTRAINT ""Тип Курса_pk"" PRIMARY KEY(""ID"" AUTOINCREMENT)
+                    ""ID"" INTEGER NOT NULL,
+                    ""Название"" varchar(30) NOT NULL,
+                    CONSTRAINT ""Тип Курса_pk"" PRIMARY KEY(""ID"" AUTOINCREMENT)
                     )",
                     @"CREATE TABLE ""Расписание"" (
-                        ""Дата"" TEXT,
-                        ""Аудитория_Корпус"" TEXT,
-                        ""Аудитория_Номер"" TEXT,
-                        ""Учебный План_ID"" int,
-                        ""Пара_Номер пары"" int,
-                        ""Преподаватель_ID"" int,
-                        ""Группа_ID"" int,
-                        FOREIGN KEY(""Группа_ID"") REFERENCES ""Группа""(""ID"") ON UPDATE CASCADE
+                    ""Дата""	TEXT,
+                    ""Аудитория_Корпус""	TEXT,
+                    ""Аудитория_Номер""	TEXT,
+                    ""Учебный План_ID""	int,
+                    ""Пара_Номер пары""	int,
+                    ""Преподаватель_ID""	int,
+                    ""Группа_ID""	int,
+                    FOREIGN KEY(""Преподаватель_ID"") REFERENCES ""Преподаватель""(""ID"") ON DELETE CASCADE ON UPDATE CASCADE,
+                    FOREIGN KEY(""Пара_Номер пары"") REFERENCES ""Пара""(""Номер пары"") ON DELETE CASCADE ON UPDATE CASCADE,
+                    FOREIGN KEY(""Учебный План_ID"") REFERENCES ""Учебный План""(""ID"") ON DELETE CASCADE ON UPDATE CASCADE,
+                    FOREIGN KEY(""Группа_ID"") REFERENCES ""Группа""(""ID"") ON DELETE CASCADE ON UPDATE CASCADE
                     )",
                     @"CREATE TABLE ""Преподаватель"" (
-                        ""ID"" INTEGER NOT NULL,
-                        ""Фамилия"" varchar(40) NOT NULL,
-                        ""Имя"" varchar(40) NOT NULL,
-                        ""Отчество"" varchar(40),
-                        CONSTRAINT ""Преподаватель_pk"" PRIMARY KEY(""ID"" AUTOINCREMENT)
+                    ""ID""	INTEGER NOT NULL,
+                    ""Фамилия""	varchar(40) NOT NULL,
+                    ""Имя""	varchar(40) NOT NULL,
+                    ""Отчество""	varchar(40),
+                    CONSTRAINT ""Преподаватель_pk"" PRIMARY KEY(""ID"" AUTOINCREMENT)
                     )",
                     @"CREATE TABLE ""ПреподИДисциплина"" (
-                        ""Дисциплина_ID"" int NOT NULL,
-                        ""Преподаватель_ID"" int NOT NULL,
-                        FOREIGN KEY(""Преподаватель_ID"") REFERENCES ""Преподаватель""(""ID"") ON UPDATE CASCADE ON DELETE SET NULL,
-                        FOREIGN KEY(""Дисциплина_ID"") REFERENCES ""Дисциплина""(""ID"") ON UPDATE CASCADE
+                    ""Дисциплина_ID""	int NOT NULL,
+                    ""Преподаватель_ID""	int NOT NULL,
+                    FOREIGN KEY(""Преподаватель_ID"") REFERENCES ""Преподаватель""(""ID"") ON DELETE CASCADE ON UPDATE CASCADE,
+                    FOREIGN KEY(""Дисциплина_ID"") REFERENCES ""Дисциплина""(""ID"") ON DELETE CASCADE ON UPDATE CASCADE
                     )",
                     @"CREATE TABLE ""Пара"" (
-                        ""Номер пары"" int NOT NULL CONSTRAINT ""Пара_pk"" PRIMARY KEY,
-                        ""Начало"" time NOT NULL,
-                        ""Конец"" time NOT NULL
+                    ""Номер пары"" int NOT NULL CONSTRAINT ""Пара_pk"" PRIMARY KEY,
+                    ""Начало"" time NOT NULL,
+                    ""Конец"" time NOT NULL
                     )",
                     @"CREATE TABLE ""Курс"" (
-                        ""ID"" INTEGER NOT NULL,
-                        ""Название_Курса"" varchar(40) NOT NULL,
-                        ""Тип Курса_ID"" int NOT NULL,
-                        CONSTRAINT ""Курс_Тип Курса"" FOREIGN KEY(""Тип Курса_ID"") REFERENCES ""Тип Курса""(""ID""),
-                        CONSTRAINT ""Курс_pk"" PRIMARY KEY(""ID"" AUTOINCREMENT)
+	                ""ID""	INTEGER NOT NULL,
+	                ""Название_Курса""	varchar(40) NOT NULL,
+	                ""Тип Курса_ID""	int NOT NULL,
+	                FOREIGN KEY(""Тип Курса_ID"") REFERENCES ""Тип Курса""(""ID"") ON DELETE CASCADE ON UPDATE CASCADE,
+	                CONSTRAINT ""Курс_pk"" PRIMARY KEY(""ID"" AUTOINCREMENT)
                     )",
                     @"CREATE TABLE ""Дисциплина"" (
-                        ""ID"" INTEGER NOT NULL,
-                        ""Название"" varchar(40) NOT NULL,
-                        CONSTRAINT ""Дисциплина_pk"" PRIMARY KEY(""ID"" AUTOINCREMENT)
+	                ""ID""	INTEGER NOT NULL,
+	                ""Название""	varchar(40) NOT NULL,
+	                CONSTRAINT ""Дисциплина_pk"" PRIMARY KEY(""ID"" AUTOINCREMENT)
                     )",
                     @"CREATE TABLE ""Группа"" (
-                        ""ID"" INTEGER NOT NULL,
-                        ""Номер"" varchar(40) NOT NULL,
-                        ""Курс_ID"" int NOT NULL,
-                        CONSTRAINT ""Группа_pk"" PRIMARY KEY(""ID"" AUTOINCREMENT),
-                        CONSTRAINT ""Группа_Курс"" FOREIGN KEY(""Курс_ID"") REFERENCES ""Курс""(""ID"")
-                    )",
+	                ""ID""	INTEGER NOT NULL,
+	                ""Номер""	varchar(40) NOT NULL,
+	                ""Курс_ID""	int NOT NULL,
+	                FOREIGN KEY(""Курс_ID"") REFERENCES ""Курс""(""ID"") ON DELETE CASCADE ON UPDATE CASCADE,
+	                CONSTRAINT ""Группа_pk"" PRIMARY KEY(""ID"" AUTOINCREMENT)
+                     )",
                     @"CREATE TABLE ""Аудитория"" (
-                        ""Корпус"" TEXT,
-                        ""Номер"" TEXT,
-                        CONSTRAINT ""Аудитория_pk"" PRIMARY KEY(""Корпус"",""Номер"")
-                    )"
-                };
+	                    ""Корпус""	TEXT,
+	                    ""Номер""	TEXT,
+	                    CONSTRAINT ""Аудитория_pk"" PRIMARY KEY(""Корпус"",""Номер"")
+                    )",
+                    @"INSERT INTO ""main"".""Пара"" (""Номер пары"", ""Начало"", ""Конец"") VALUES ('1', '8:00', '9:30');",
+                    @"INSERT INTO ""main"".""Пара"" (""Номер пары"", ""Начало"", ""Конец"") VALUES ('2', '9:45', '11:15');",
+                    @"INSERT INTO ""main"".""Пара"" (""Номер пары"", ""Начало"", ""Конец"") VALUES ('3', '11:30', '13:00');",
+                    @"INSERT INTO ""main"".""Пара"" (""Номер пары"", ""Начало"", ""Конец"") VALUES ('4', '13:20', '14:50');",
+                    @"INSERT INTO ""main"".""Пара"" (""Номер пары"", ""Начало"", ""Конец"") VALUES ('5', '15:10', '16:40');",
+                    @"INSERT INTO ""main"".""Пара"" (""Номер пары"", ""Начало"", ""Конец"") VALUES ('6', '16:55', '18:25');"
+            };
          }
     }
 
