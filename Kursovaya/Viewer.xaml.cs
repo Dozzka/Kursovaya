@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Configuration;
 using System.Data;
 using System.Linq;
 using System.Text;
@@ -22,7 +23,13 @@ namespace Kursovaya
     /// </summary>
     public partial class Viewer : Window
     {
-        string connectionString = $@"Data Source = E:\Учеба\Управление Данными\Raspisanie.db";
+        string connectionString
+        {
+            get
+            {
+                return @"Data Source=" + ConfigurationManager.AppSettings["PathToDb"];
+            }
+        }
         public Viewer()
         {
             InitializeComponent();
